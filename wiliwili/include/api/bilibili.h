@@ -190,6 +190,20 @@ public:
     static void getWatchLater(const std::function<void(WatchLaterListWrapper)>& callback = nullptr,
                               const ErrorCallback& error                                 = nullptr);
 
+    /// 加入稍后再看（需要登录，csrf 为 bili_jct）
+    static void add_to_watch_later(const std::string& csrf, uint64_t aid,
+                                   const std::function<void()>& callback = nullptr,
+                                   const ErrorCallback& error            = nullptr);
+
+    /// 从稍后再看移除（需要登录，csrf 为 bili_jct）
+    static void remove_from_watch_later(const std::string& csrf, uint64_t aid,
+                                        const std::function<void()>& callback = nullptr,
+                                        const ErrorCallback& error            = nullptr);
+
+    /// 清空稍后再看（需要登录，csrf 为 bili_jct）
+    static void clear_watch_later(const std::string& csrf, const std::function<void()>& callback = nullptr,
+                                  const ErrorCallback& error = nullptr);
+
     /**
      * 获取用户创建的收藏列表或用户订阅的合集
      * @param mid

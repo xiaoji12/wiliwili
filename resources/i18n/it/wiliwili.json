@@ -498,6 +498,13 @@
       "related": "{} risposte totali",
       "end": "Non ci sono altri commenti.",
       "delete": "Dopo aver eliminato il commento, tutte le risposte sotto il commento verranno eliminate\n\nVuoi continuare?"
+    },
+    "watch_later": {
+      "add": "Guarda più tardi",
+      "in_list": "Rimuovi da Guarda più tardi",
+      "added": "Aggiunto a Guarda più tardi",
+      "removed": "Rimosso da Guarda più tardi",
+      "failed": "Operazione Guarda più tardi non riuscita, riprova"
     }
   },
   "dialog": {

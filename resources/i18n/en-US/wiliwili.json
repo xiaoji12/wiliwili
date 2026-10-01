@@ -498,6 +498,13 @@
       "related": "{} replies in total",
       "end": "No more comments",
       "delete": "After deleting the comment, all replies under the comment will be deleted\n\nDo you want to continue?"
+    },
+    "watch_later": {
+      "add": "Watch Later",
+      "in_list": "Remove from Watch Later",
+      "added": "Added to Watch Later",
+      "removed": "Removed from Watch Later",
+      "failed": "Watch Later action failed, please retry"
     }
   },
   "dialog": {

@@ -204,18 +204,20 @@ uint64_t SponsorBlock::getVersion() {
 }
 
 uint32_t SponsorBlock::colorForCategory(const std::string& category) {
-    // 配色参考 SponsorBlock 官方浏览器扩展，便于用户建立直觉
-    if (category == "sponsor") return 0xFF4444;           // 红   —— 赞助 / 恰饭
-    if (category == "selfpromo") return 0xFFFF44;         // 黄   —— 自我推广
-    if (category == "interaction") return 0xCC44FF;       // 紫   —— 互动提醒
-    if (category == "intro") return 0x00FFFF;             // 青   —— 开场
-    if (category == "outro") return 0x4488FF;             // 蓝   —— 结尾
-    if (category == "preview") return 0x0088FF;           // 深蓝 —— 预告
-    if (category == "filler") return 0x7F44FF;            // 蓝紫 —— 离题内容
-    if (category == "music_offtopic") return 0xFF9900;    // 橙   —— 非音乐部分
-    if (category == "poi_highlight") return 0xFF66AA;     // 粉   —— 高能时刻
-    if (category == "exclusive_access") return 0x00AA00;  // 绿   —— 独占内容
-    return 0xAAAAAA;                                      // 灰   —— 未知分类
+    // 与 SponsorBlock 官方浏览器扩展的 barTypes 配色完全一致，
+    // 保证用户在网页端与客户端看到的颜色是同一套。
+    // 来源：SponsorBlock src/config.ts -> barTypes[*].color
+    if (category == "sponsor") return 0x00D400;           // 绿     —— 赞助 / 恰饭
+    if (category == "selfpromo") return 0xFFFF00;         // 黄     —— 自我推广
+    if (category == "interaction") return 0xCC00FF;       // 紫     —— 互动提醒
+    if (category == "intro") return 0x00FFFF;             // 青     —— 开场
+    if (category == "outro") return 0x0202ED;             // 蓝     —— 结尾
+    if (category == "preview") return 0x008FD6;           // 浅蓝   —— 预告
+    if (category == "filler") return 0x7300FF;            // 紫罗兰 —— 离题内容
+    if (category == "music_offtopic") return 0xFF9900;    // 橙     —— 非音乐部分
+    if (category == "poi_highlight") return 0xFF1684;     // 粉     —— 高能时刻
+    if (category == "exclusive_access") return 0x008A5C;  // 深绿   —— 独占内容
+    return 0xAAAAAA;                                      // 灰     —— 未知分类
 }
 
 std::string SponsorBlock::categoryName(const std::string& category) {

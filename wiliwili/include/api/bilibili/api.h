@@ -196,8 +196,11 @@ const std::string UserBangumiCollection = _apiBase + "/x/space/bangumi/follow/li
 const std::string UserUGCSeason = _apiBase + "/x/v3/fav/folder/collected/list";
 /// 用户订阅合集的视频列表
 const std::string UserUGCSeasonVideoList = _apiBase + "/x/space/fav/season/list";
-// watch later
-const std::string WatchLater = _apiBase + "/x/v2/history/toview/web";
+// watch later（稍后再看）
+const std::string WatchLater      = _apiBase + "/x/v2/history/toview/web";
+const std::string WatchLaterAdd   = _apiBase + "/x/v2/history/toview/add";
+const std::string WatchLaterDel   = _apiBase + "/x/v2/history/toview/del";
+const std::string WatchLaterClear = _apiBase + "/x/v2/history/toview/clear";
 
 /// ===
 /// 搜索页API

@@ -1,7 +1,7 @@
 # 致谢与第三方引用
 
-本仓库是基于 **wiliwili** 的二次开发分支，新增了 SponsorBlock（空降助手）、
-进度条分段着色、B 站 CDN 优化等功能。
+本仓库是基于 **wiliwili** 的二次开发分支，新增了 SponsorBlock（空降助手，采用官方同款分段配色）、
+进度条分段着色、B 站 CDN 优化（屏蔽 PCDN）、稍后再看一键加入/移除等功能。
 
 > **本仓库的全部新增与修改代码均由 AI 生成**，详见文末 [AI 声明](#三ai-声明)。
 
@@ -32,8 +32,11 @@
 
 - 仓库：https://github.com/ajayyy/SponsorBlock
 - 引用方式：
-  - **进度条分段配色**参考其官方浏览器扩展，使颜色与用户已有认知一致
-    （赞助红 / 自我推广黄 / 互动紫 / 开场青 / 结尾蓝 等）
+  - **进度条分段配色完全照搬其官方浏览器扩展的 `barTypes[*].color`**，
+    使客户端与网页端颜色一致（赞助 `#00D400` 绿 / 自我推广 `#FFFF00` 黄 /
+    互动 `#CC00FF` 紫 / 开场 `#00FFFF` 青 / 结尾 `#0202ED` 蓝 /
+    预告 `#008FD6` 浅蓝 / 离题 `#7300FF` 紫罗兰 / 非音乐部分 `#FF9900` 橙 /
+    高能时刻 `#FF1684` 粉 / 独占内容 `#008A5C` 深绿）
   - 「只发送视频 ID 哈希前缀以保护隐私」的设计思路亦源自该项目
 
 ---
@@ -77,26 +80,30 @@
 
 ### 具体由 AI 生成的内容
 
-**新增文件（6 个）**
+**新增文件（9 个）**
 
 | 文件 | 说明 |
 |---|---|
 | `wiliwili/include/api/sponsor_block.hpp` | 空降助手接口定义 |
-| `wiliwili/source/api/sponsor_block.cpp` | 空降助手实现（请求 / 解析 / 跳过 / 配色） |
+| `wiliwili/source/api/sponsor_block.cpp` | 空降助手实现（请求 / 解析 / 跳过 / 官方配色） |
 | `wiliwili/include/utils/sha256_helper.hpp` | SHA-256 接口 |
 | `wiliwili/source/utils/sha256_helper.cpp` | 自包含 SHA-256 实现（FIPS 180-4） |
 | `wiliwili/include/utils/cdn_helper.hpp` | CDN 优化接口 |
 | `wiliwili/source/utils/cdn_helper.cpp` | PCDN 屏蔽 + CDN 优选实现 |
+| `wiliwili/include/utils/watch_later_helper.hpp` | 稍后再看状态缓存接口 |
+| `wiliwili/source/utils/watch_later_helper.cpp` | 稍后再看加入 / 移除 / 列表缓存实现 |
+| `resources/svg/bpx-svg-sprite-later(-active).svg` | 稍后再看按钮图标（普通 / 激活态） |
 
-**修改文件（19 个）**
+**修改文件（26 个）**
 
 | 类别 | 文件 |
 |---|---|
-| 功能接入 | `player_base_activity.cpp`、`video_view.{hpp,cpp}`、`video_progress_slider.{hpp,cpp}`、`video_detail_api.cpp` |
+| 功能接入 | `player_base_activity.cpp`、`player_activity.{hpp,cpp}`、`player_activity.xml`、`video_view.{hpp,cpp}`、`video_progress_slider.{hpp,cpp}`、`video_detail_api.cpp` |
+| 稍后再看 API | `bilibili/api.h`、`bilibili.h`、`mine_api.cpp` |
 | 配置项 | `config_helper.{hpp,cpp}`（新增 4 个配置键） |
 | 设置界面 | `setting_activity.{hpp,cpp}`、`setting_activity.xml` |
 | 多语言 | 7 种语言的 `wiliwili.json` |
-| 构建 | `CMakeLists.txt` |
+| 构建 / CI | `CMakeLists.txt`、`.github/workflows/release-cn.yml` |
 
 ### 已知局限
 

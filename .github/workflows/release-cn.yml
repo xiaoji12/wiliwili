@@ -22,7 +22,7 @@ on:
       tag:
         description: 'Release tag / version, e.g. v1.6.0-cn'
         required: true
-        default: 'v1.6.0-cn'
+        default: 'v1.6.1-cn'
       upload_release:
         description: 'Create or update the GitHub Release with the built artifact'
         required: false
@@ -44,7 +44,7 @@ jobs:
         env:
           INPUT_TAG: ${{ github.event.inputs.tag }}
         run: |
-          TAG="${INPUT_TAG:-v1.6.0-cn}"
+          TAG="${INPUT_TAG:-v1.6.1-cn}"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           echo "flatpak_name=wiliwili-Linux-${TAG}-x86_64" >> "$GITHUB_OUTPUT"
           echo "resolved tag=${TAG}"

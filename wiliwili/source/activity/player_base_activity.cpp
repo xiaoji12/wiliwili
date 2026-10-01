@@ -283,6 +283,12 @@ void BasePlayerActivity::setCommonData() {
     this->btnFavorite->getParent()->addGestureRecognizer(
         new brls::TapGestureRecognizer(this->btnFavorite->getParent()));
 
+    // 「稍后再看」按钮默认隐藏：只有普通视频页（PlayerActivity）会重新打开它，
+    // 番剧页沿用收藏体系，不显示该按钮。
+    if (this->btnLater) {
+        this->btnLater->getParent()->setVisibility(brls::Visibility::GONE);
+    }
+
     this->videoUserInfo->addGestureRecognizer(new brls::TapGestureRecognizer(this->videoUserInfo));
 
     this->setRelationButton(false, false, false);

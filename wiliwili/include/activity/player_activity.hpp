@@ -122,10 +122,12 @@ protected:
     BRLS_BIND(SVGImage, btnCoin, "video/btn/coin");
     BRLS_BIND(SVGImage, btnFavorite, "video/btn/favorite");
     BRLS_BIND(SVGImage, btnQR, "video/btn/qr");
+    BRLS_BIND(SVGImage, btnLater, "video/btn/later");
     BRLS_BIND(brls::Label, labelAgree, "video/label/agree");
     BRLS_BIND(brls::Label, labelCoin, "video/label/coin");
     BRLS_BIND(brls::Label, labelFavorite, "video/label/favorite");
     BRLS_BIND(brls::Label, labelQR, "video/label/qr");
+    BRLS_BIND(brls::Label, labelLater, "video/label/later");
 
     // 监控mpv事件
     MPVEvent::Subscription eventSubscribeID;
@@ -170,6 +172,12 @@ public:
 private:
     // 切换UP视频
     ChangeVideoEvent changeVideoEvent;
+
+    // 初始化「稍后再看」按钮（显示、绑定点击、拉取状态）
+    void setupWatchLaterButton();
+
+    // 依据本地缓存刷新「稍后再看」按钮的图标与文案
+    void updateWatchLaterButton();
 };
 
 class PlayerSeasonActivity : public BasePlayerActivity {

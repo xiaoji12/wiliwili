@@ -14,6 +14,7 @@
 #include "utils/dialog_helper.hpp"
 #include "utils/activity_helper.hpp"
 #include "utils/image_helper.hpp"
+#include "utils/watch_later_helper.hpp"
 #include "fragment/player_collection.hpp"
 #include "fragment/player_fragments.hpp"
 #include "fragment/player_evaluate.hpp"
@@ -193,6 +194,9 @@ void PlayerActivity::onContentAvailable() {
         return true;
     });
 
+    // 稍后再看按钮（加入 / 移除）
+    this->setupWatchLaterButton();
+
     // 用户头像框
     this->videoUserInfo->registerClickAction([this](...) {
         if (!DialogHelper::checkLogin()) return true;
@@ -211,6 +215,66 @@ void PlayerActivity::onContentAvailable() {
 
     // 隐藏跳过片头片尾，因为这个是番剧专属的设置
     this->video->hideSkipOpeningCreditsSetting();
+}
+
+void PlayerActivity::setupWatchLaterButton() {
+    if (!this->btnLater) return;
+
+    auto* laterBox = this->btnLater->getParent();
+    if (!laterBox) return;
+
+    if (!wiliwili::WatchLaterHelper::SHOW_BUTTON) {
+        laterBox->setVisibility(brls::Visibility::GONE);
+        return;
+    }
+
+    laterBox->setVisibility(brls::Visibility::VISIBLE);
+    laterBox->addGestureRecognizer(new brls::TapGestureRecognizer(laterBox));
+
+    laterBox->registerClickAction([this](brls::View*) {
+        if (!DialogHelper::checkLogin()) return true;
+
+        const std::string bvid = this->videoDetailResult.bvid;
+        const uint64_t aid     = this->videoDetailResult.aid;
+        if (bvid.empty() || aid == 0) return true;
+
+        auto& helper         = wiliwili::WatchLaterHelper::instance();
+        const bool inList    = helper.contains(bvid);
+        const std::string okMsg =
+            inList ? "wiliwili/player/watch_later/removed"_i18n : "wiliwili/player/watch_later/added"_i18n;
+
+        auto done = [this, okMsg](bool ok) {
+            if (!ok) {
+                brls::Application::notify("wiliwili/player/watch_later/failed"_i18n);
+                return;
+            }
+            this->updateWatchLaterButton();
+            brls::Application::notify(okMsg);
+        };
+
+        if (inList) {
+            helper.remove(bvid, aid, done);
+        } else {
+            helper.add(bvid, aid, done);
+        }
+        return true;
+    });
+
+    // 先用本地缓存渲染一次，再异步校正
+    this->updateWatchLaterButton();
+    wiliwili::WatchLaterHelper::instance().refresh([this]() { this->updateWatchLaterButton(); });
+}
+
+void PlayerActivity::updateWatchLaterButton() {
+    if (!this->btnLater || !this->labelLater) return;
+
+    const std::string bvid = this->videoDetailResult.bvid;
+    const bool inList      = !bvid.empty() && wiliwili::WatchLaterHelper::instance().contains(bvid);
+
+    this->btnLater->setImageFromSVGRes(inList ? "svg/bpx-svg-sprite-later-active.svg"
+                                              : "svg/bpx-svg-sprite-later.svg");
+    this->labelLater->setText(inList ? "wiliwili/player/watch_later/in_list"_i18n
+                                     : "wiliwili/player/watch_later/add"_i18n);
 }
 
 void PlayerActivity::onVideoInfo(const bilibili::VideoDetailResult& result) {
@@ -241,6 +305,12 @@ void PlayerActivity::onVideoInfo(const bilibili::VideoDetailResult& result) {
     this->labelCoin->setText(wiliwili::num2w(result.stat.coin));
     this->labelFavorite->setText(wiliwili::num2w(result.stat.favorite));
     this->labelQR->setText(wiliwili::num2w(result.stat.share));
+
+    // 切换视频后重新校正「稍后再看」按钮状态
+    if (wiliwili::WatchLaterHelper::SHOW_BUTTON) {
+        this->updateWatchLaterButton();
+        wiliwili::WatchLaterHelper::instance().refresh([this]() { this->updateWatchLaterButton(); });
+    }
 }
 
 void PlayerActivity::onUpInfo(const bilibili::UserDetailResultWrapper& user) {
