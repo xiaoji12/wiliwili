@@ -11,6 +11,8 @@
 #include <vector>
 #include <borealis/core/box.hpp>
 
+#include "api/sponsor_block.hpp"
+
 namespace brls {
 class Rectangle;
 }
@@ -60,6 +62,16 @@ public:
 
     void setManuallyMode();
 
+    /**
+     * 设置空降助手分段，用于在进度条轨道上绘制彩色区间标记。
+     * @param data     分段列表（起止时间为秒）
+     * @param duration 视频总时长（秒），用于把时间换算成 0~1 的比例
+     */
+    void setSponsorSegments(const std::vector<wiliwili::SponsorSegment>& data, double duration);
+
+    /// 清空分段颜色标记
+    void clearSponsorSegments();
+
 private:
     brls::InputManager* input;
     brls::Rectangle* line;
@@ -72,6 +84,12 @@ private:
     brls::Event<> progressCancelEvent;
 
     std::vector<float> clipPointList;
+
+    /// 空降助手分段（用于在轨道上绘制颜色标记）
+    std::vector<wiliwili::SponsorSegment> sponsorSegments;
+
+    /// 视频总时长（秒）。0 表示未知，此时不绘制分段标记
+    double sponsorDuration = 0;
 
     float progress             = 1;
     bool pointerSelected       = false;

@@ -41,7 +41,15 @@
         "header": "ネットワーク",
         "tls": "TLS検証",
         "proxy": "プロキシ",
-        "proxy_hint": "例：http://127.0.0.1:7890"
+        "proxy_hint": "例：http://127.0.0.1:7890",
+        "block_pcdn": "Block PCDN nodes",
+        "cdn_prefer": "Preferred CDN",
+        "cdn_auto": "Auto",
+        "cdn_aliyun": "Aliyun",
+        "cdn_tencent": "Tencent Cloud",
+        "cdn_huawei": "Huawei Cloud",
+        "cdn_bytedance": "Volcano Engine",
+        "cdn_baidu": "Baidu Cloud"
       },
       "ui": {
         "header": "UI",
@@ -102,6 +110,16 @@
           "ps": "PlayStation",
           "keyboard": "キーボード"
         }
+      },
+      "sponsor": {
+        "header": "SponsorBlock",
+        "block": "Auto skip sponsor segments",
+        "progress_bar": "Show segment colors on progress bar",
+        "categories": "Skip categories",
+        "cat_default": "Default (sponsor / intro / outro)",
+        "cat_sponsor_only": "Sponsor only",
+        "cat_loose": "Relaxed (+ self-promo / highlight)",
+        "cat_all": "All (every labeled type)"
       }
     },
     "tools": {

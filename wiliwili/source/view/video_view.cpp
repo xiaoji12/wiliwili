@@ -13,6 +13,7 @@
 #include <borealis/views/applet_frame.hpp>
 #include <pystring.h>
 
+#include "api/sponsor_block.hpp"
 #include "utils/number_helper.hpp"
 #include "utils/config_helper.hpp"
 #include "utils/string_helper.hpp"
@@ -1129,6 +1130,28 @@ void VideoView::hideSkipOpeningCreditsSetting() { showOpeningCreditsSetting = fa
 
 void VideoView::hideVideoProgressSlider() { osdSlider->setVisibility(brls::Visibility::GONE); }
 
+void VideoView::updateSponsorSegmentsOnSlider() {
+    auto& sponsor = wiliwili::SponsorBlock::instance();
+
+    // 只有分段数据真正变化时才重建，避免每帧加锁与重绘
+    const uint64_t version = sponsor.getVersion();
+    if (version == sponsorSegmentVersion) return;
+    sponsorSegmentVersion = version;
+
+    if (!wiliwili::SponsorBlock::SHOW_ON_PROGRESS_BAR) {
+        osdSlider->clearSponsorSegments();
+        return;
+    }
+
+    const double duration = static_cast<double>(getRealDuration());
+    if (duration <= 0) {
+        osdSlider->clearSponsorSegments();
+        return;
+    }
+
+    osdSlider->setSponsorSegments(sponsor.getSegments(), duration);
+}
+
 void VideoView::setTitle(const std::string& title) { this->videoTitleLabel->setText(title); }
 
 void VideoView::setOnlineCount(const std::string& count) { this->videoOnlineCountLabel->setText(count); }
@@ -1588,6 +1611,10 @@ void VideoView::registerMpvEvent() {
                 this->setProgress((float)mpvCore->playback_time / getRealDuration());
                 break;
             case MpvEventEnum::UPDATE_PROGRESS:
+                // 空降助手：命中赞助分段时自动跳过
+                wiliwili::SponsorBlock::instance().onTimeUpdate(this->mpvCore->video_progress);
+                // 空降助手：把分段标记同步到进度条
+                this->updateSponsorSegmentsOnSlider();
                 this->setPlaybackTime(wiliwili::sec2Time(this->mpvCore->video_progress));
                 this->setProgress((float)mpvCore->playback_time / getRealDuration());
                 break;

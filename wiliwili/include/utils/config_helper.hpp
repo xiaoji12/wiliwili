@@ -44,6 +44,10 @@ enum class SettingItem {
     PLAYER_BOTTOM_BAR,
     PLAYER_HIGHLIGHT_BAR,
     PLAYER_SKIP_OPENING_CREDITS,
+    PLAYER_SPONSOR_BLOCK,        // 空降助手：自动跳过赞助片段
+    PLAYER_SPONSOR_CATEGORIES,   // 空降助手：参与跳过的分类（逗号分隔）
+    PLAYER_SPONSOR_PROGRESS_BAR, // 空降助手：在进度条上显示分段颜色标记
+    PLAYER_SPONSOR_PRESET,       // 空降助手：跳过分类预设（设置页下拉框索引）
     PLAYER_LOW_QUALITY,
     PLAYER_INMEMORY_CACHE,
     PLAYER_HWDEC,
@@ -99,6 +103,8 @@ enum class SettingItem {
     HTTP_PROXY,
     HTTP_PROXY_STATUS,
     TLS_VERIFY,
+    NETWORK_BLOCK_PCDN,  // 屏蔽 B 站 PCDN（P2P CDN）节点
+    NETWORK_CDN_PREFER,  // 播放地址 CDN 优选
     HTTP_TIMEOUT,
     HTTP_CONNECTION_TIMEOUT,
     HTTP_DNS_CACHE_TIMEOUT,

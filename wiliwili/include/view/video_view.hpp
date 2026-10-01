@@ -143,6 +143,9 @@ public:
 
     void hideVideoProgressSlider();
 
+    /// 空降助手：按需把分段数据同步到进度条（仅当数据变化时重建标记）
+    void updateSponsorSegmentsOnSlider();
+
     /// 隐藏左下角的播放时间
     void hideStatusLabel();
 
@@ -359,6 +362,9 @@ private:
     brls::Time hintLastShowTime    = 0;
     int64_t lastPlayedPosition = POSITION_UNDEFINED;
     VideoHighlightData highlightData;  // 在播放器进度条上显示的标记点（用来展示片头片尾标记）
+
+    /// 空降助手分段数据的版本号，用于判断是否需要刷新进度条上的分段标记
+    uint64_t sponsorSegmentVersion = 0;
 
     // 缩略图预览的显示状态
     bool showThumbnailPreview  = false;  // 是否显示缩略图预览

@@ -8,6 +8,7 @@
 #include <borealis/views/applet_frame.hpp>
 #include <borealis/views/dialog.hpp>
 
+#include "api/sponsor_block.hpp"
 #include "activity/player_activity.hpp"
 #include "fragment/player_collection.hpp"
 #include "fragment/player_coin.hpp"
@@ -706,6 +707,13 @@ void BasePlayerActivity::onVideoPlayUrl(const bilibili::VideoUrlResult& result) 
             }
             this->video->setUrl(urls, start, end);
         }
+    }
+
+    // 空降助手：按当前视频 ID 拉取赞助分段（异步请求，失败静默降级，不影响播放）
+    if (!videoDetailResult.bvid.empty()) {
+        wiliwili::SponsorBlock::instance().load(videoDetailResult.bvid);
+    } else if (!episodeResult.bvid.empty()) {
+        wiliwili::SponsorBlock::instance().load(episodeResult.bvid);
     }
 
     // 设置mpv事件

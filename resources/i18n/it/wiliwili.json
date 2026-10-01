@@ -41,7 +41,15 @@
         "header": "Rete",
         "tls": "Verifica TLS",
         "proxy": "Proxy",
-        "proxy_hint": "esempio: http://127.0.0.1:7890"
+        "proxy_hint": "esempio: http://127.0.0.1:7890",
+        "block_pcdn": "Block PCDN nodes",
+        "cdn_prefer": "Preferred CDN",
+        "cdn_auto": "Auto",
+        "cdn_aliyun": "Aliyun",
+        "cdn_tencent": "Tencent Cloud",
+        "cdn_huawei": "Huawei Cloud",
+        "cdn_bytedance": "Volcano Engine",
+        "cdn_baidu": "Baidu Cloud"
       },
       "ui": {
         "header": "UI",
@@ -102,6 +110,16 @@
           "ps": "PlayStation",
           "keyboard": "Tastiera"
         }
+      },
+      "sponsor": {
+        "header": "SponsorBlock",
+        "block": "Auto skip sponsor segments",
+        "progress_bar": "Show segment colors on progress bar",
+        "categories": "Skip categories",
+        "cat_default": "Default (sponsor / intro / outro)",
+        "cat_sponsor_only": "Sponsor only",
+        "cat_loose": "Relaxed (+ self-promo / highlight)",
+        "cat_all": "All (every labeled type)"
       }
     },
     "tools": {
@@ -182,10 +200,10 @@
   },
   "hints": {
     "hint1": "Seleziona un gioco dalla schermata home",
-    "hint2": "Tieni premuto il tasto \uE0E5 e clicca \uE0E0 per entrare in hbmenu",
+    "hint2": "Tieni premuto il tasto  e clicca  per entrare in hbmenu",
     "hint3": "In hbmenu, seleziona wiliwili",
     "hint4": "Opzionale: Usa il forwarder NSP di wiliwili (Posiziona wiliwili.nro in /switch/wiliwili.nro)",
-    "hint_nsp": "Clicca \uE0E0 per installare il forwarder NSP",
+    "hint_nsp": "Clicca  per installare il forwarder NSP",
     "hint_confirm": "L'installazione del forwarder NSP potrebbe risultare in un ban\nConferma nuovamente",
     "hint_right": "Le immagini provengono da Internet, il copyright appartiene a Nintendo Co., Ltd"
   },

@@ -24,6 +24,8 @@
 #include "utils/thread_helper.hpp"
 #include "utils/image_helper.hpp"
 #include "utils/config_helper.hpp"
+#include "api/sponsor_block.hpp"
+#include "utils/cdn_helper.hpp"
 
 #include "pystring.h"
 #include "utils/crash_helper.hpp"
@@ -191,6 +193,12 @@ std::unordered_map<SettingItem, ProgramOption> ProgramConfig::SETTING_MAP = {
     {SettingItem::PLAYER_BOTTOM_BAR, {"player_bottom_bar", {}, {}, 1}},
     {SettingItem::PLAYER_HIGHLIGHT_BAR, {"player_highlight_bar", {}, {}, 0}},
     {SettingItem::PLAYER_SKIP_OPENING_CREDITS, {"player_skip_opening_credits", {}, {}, 1}},
+    {SettingItem::PLAYER_SPONSOR_BLOCK, {"player_sponsor_block", {}, {}, 1}},
+    {SettingItem::PLAYER_SPONSOR_CATEGORIES, {"player_sponsor_categories", {}, {}, 1}},
+    {SettingItem::PLAYER_SPONSOR_PROGRESS_BAR, {"player_sponsor_progress_bar", {}, {}, 1}},
+    {SettingItem::PLAYER_SPONSOR_PRESET, {"player_sponsor_preset", {}, {}, 1}},
+    {SettingItem::NETWORK_BLOCK_PCDN, {"network_block_pcdn", {}, {}, 1}},
+    {SettingItem::NETWORK_CDN_PREFER, {"network_cdn_prefer", {}, {}, 1}},
     {SettingItem::PLAYER_LOW_QUALITY, {"player_low_quality", {}, {}, 1}},
 #if defined(IOS) || defined(__PSV__) || defined(__SWITCH__)
     {SettingItem::PLAYER_HWDEC, {"player_hwdec", {}, {}, 1}},
@@ -633,6 +641,29 @@ void ProgramConfig::load() {
 
     // 是否自动跳过片头片尾
     BasePlayerActivity::PLAYER_SKIP_OPENING_CREDITS = getBoolOption(SettingItem::PLAYER_SKIP_OPENING_CREDITS);
+
+    // 空降助手（SponsorBlock）：自动跳过赞助、开场、结尾等片段
+    wiliwili::SponsorBlock::ENABLED = getBoolOption(SettingItem::PLAYER_SPONSOR_BLOCK);
+    // 是否在播放进度条上绘制分段颜色标记
+    wiliwili::SponsorBlock::SHOW_ON_PROGRESS_BAR = getBoolOption(SettingItem::PLAYER_SPONSOR_PROGRESS_BAR);
+    {
+        // 分类列表以逗号分隔，留空时沿用内置默认值
+        const std::string categories =
+            getSettingItem<std::string>(SettingItem::PLAYER_SPONSOR_CATEGORIES, std::string{});
+        if (!categories.empty()) {
+            std::vector<std::string> list;
+            pystring::split(categories, list, ",");
+            std::vector<std::string> valid;
+            for (const auto& item : list) {
+                if (!item.empty()) valid.emplace_back(item);
+            }
+            if (!valid.empty()) wiliwili::SponsorBlock::CATEGORIES = std::move(valid);
+        }
+    }
+
+    // B 站播放地址优化：屏蔽 PCDN 节点、CDN 优选
+    bilibili::CDNHelper::BLOCK_PCDN = getBoolOption(SettingItem::NETWORK_BLOCK_PCDN);
+    bilibili::CDNHelper::PREFER     = getIntOption(SettingItem::NETWORK_CDN_PREFER);
 
     // 初始化是否固定显示底部进度条
     VideoView::BOTTOM_BAR = getBoolOption(SettingItem::PLAYER_BOTTOM_BAR);

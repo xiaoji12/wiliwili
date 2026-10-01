@@ -95,6 +95,27 @@
                                     id="setting/video/auto_fullscreen"/>
 
                         </brls:Box>
+                        <brls:Header
+                                width="auto"
+                                height="auto"
+                                title="@i18n/wiliwili/setting/app/sponsor/header"
+                                marginBottom="0px"/>
+                        <brls:Box
+                                width="100%"
+                                height="auto"
+                                axis="column"
+                                marginBottom="30px">
+
+                            <brls:BooleanCell
+                                    id="setting/sponsor/block"/>
+
+                            <SelectorCell
+                                    id="setting/sponsor/categories"/>
+
+                            <brls:BooleanCell
+                                    id="setting/sponsor/progress_bar"/>
+
+                        </brls:Box>
                     </brls:Box>
                 </brls:ScrollingFrame>
             </Tab>
@@ -279,6 +300,12 @@
 
                             <brls:InputCell
                                     id="setting/network/input"/>
+
+                            <brls:BooleanCell
+                                    id="setting/network/pcdn"/>
+
+                            <SelectorCell
+                                    id="setting/network/cdn"/>
 
                         </brls:Box>
                     </brls:Box>

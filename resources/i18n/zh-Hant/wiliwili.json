@@ -41,7 +41,15 @@
         "header": "網絡設定",
         "tls": "TLS 驗證",
         "proxy": "網絡代理",
-        "proxy_hint": "示例: http://127.0.0.1:7890"
+        "proxy_hint": "示例: http://127.0.0.1:7890",
+        "block_pcdn": "封鎖 PCDN 節點",
+        "cdn_prefer": "CDN 優選",
+        "cdn_auto": "自動",
+        "cdn_aliyun": "阿里雲",
+        "cdn_tencent": "騰訊雲",
+        "cdn_huawei": "華為雲",
+        "cdn_bytedance": "火山引擎",
+        "cdn_baidu": "百度雲"
       },
       "ui": {
         "header": "介面設定",
@@ -102,6 +110,16 @@
           "ps": "PlayStation",
           "keyboard": "鍵盤"
         }
+      },
+      "sponsor": {
+        "header": "空降助手",
+        "block": "自動跳過贊助片段",
+        "progress_bar": "在進度條上顯示分段顏色",
+        "categories": "跳過分類",
+        "cat_default": "預設（贊助 / 開場 / 結尾）",
+        "cat_sponsor_only": "僅贊助片段",
+        "cat_loose": "寬鬆（含自我推廣 / 高能時刻）",
+        "cat_all": "全部（所有已標註類型）"
       }
     },
     "tools": {

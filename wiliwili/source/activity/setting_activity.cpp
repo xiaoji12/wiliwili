@@ -17,6 +17,8 @@
 #include "activity/hint_activity.hpp"
 #include "fragment/setting_network.hpp"
 #include "fragment/test_rumble.hpp"
+#include "api/sponsor_block.hpp"
+#include "utils/cdn_helper.hpp"
 #include "utils/config_helper.hpp"
 #include "utils/vibration_helper.hpp"
 #include "utils/dialog_helper.hpp"
@@ -557,6 +559,71 @@ void SettingActivity::onContentAvailable() {
                             bilibili::BilibiliClient::VIDEO_CODEC = codecOption.rawOptionList[data];
                             return true;
                         });
+
+    /// 空降助手（SponsorBlock）
+    cellSponsorBlock->init("wiliwili/setting/app/sponsor/block"_i18n,
+                           conf.getBoolOption(SettingItem::PLAYER_SPONSOR_BLOCK), [](bool value) {
+                               ProgramConfig::instance().setSettingItem(SettingItem::PLAYER_SPONSOR_BLOCK, value);
+                               wiliwili::SponsorBlock::ENABLED = value;
+                           });
+
+    cellSponsorProgressBar->init("wiliwili/setting/app/sponsor/progress_bar"_i18n,
+                                 conf.getBoolOption(SettingItem::PLAYER_SPONSOR_PROGRESS_BAR), [](bool value) {
+                                     ProgramConfig::instance().setSettingItem(
+                                         SettingItem::PLAYER_SPONSOR_PROGRESS_BAR, value);
+                                     wiliwili::SponsorBlock::SHOW_ON_PROGRESS_BAR = value;
+                                 });
+
+    selectorSponsorCategories->init(
+        "wiliwili/setting/app/sponsor/categories"_i18n,
+        {"wiliwili/setting/app/sponsor/cat_default"_i18n, "wiliwili/setting/app/sponsor/cat_sponsor_only"_i18n,
+         "wiliwili/setting/app/sponsor/cat_loose"_i18n, "wiliwili/setting/app/sponsor/cat_all"_i18n},
+        conf.getIntOptionIndex(SettingItem::PLAYER_SPONSOR_PRESET), [](int data) {
+            // 预设方案 -> 实际分类列表，空字符串表示沿用内置默认值
+            static const std::vector<std::string> presets = {
+                "",
+                "sponsor",
+                "sponsor,intro,outro,selfpromo,poi_highlight",
+                "sponsor,intro,outro,selfpromo,interaction,preview,filler,music_offtopic,poi_highlight,"
+                "exclusive_access",
+            };
+            if (data < 0 || data >= static_cast<int>(presets.size())) return false;
+
+            ProgramConfig::instance().setSettingItem(SettingItem::PLAYER_SPONSOR_PRESET, data);
+            ProgramConfig::instance().setSettingItem(SettingItem::PLAYER_SPONSOR_CATEGORIES, presets[data]);
+
+            // 立即生效，无需重启
+            if (presets[data].empty()) {
+                wiliwili::SponsorBlock::CATEGORIES = {"sponsor", "intro", "outro"};
+            } else {
+                std::vector<std::string> list;
+                pystring::split(presets[data], list, ",");
+                std::vector<std::string> valid;
+                for (const auto& item : list) {
+                    if (!item.empty()) valid.emplace_back(item);
+                }
+                if (!valid.empty()) wiliwili::SponsorBlock::CATEGORIES = std::move(valid);
+            }
+            return true;
+        });
+
+    /// B 站播放地址优化：屏蔽 PCDN 节点 / CDN 优选
+    cellBlockPcdn->init("wiliwili/setting/app/network/block_pcdn"_i18n,
+                        conf.getBoolOption(SettingItem::NETWORK_BLOCK_PCDN), [](bool value) {
+                            ProgramConfig::instance().setSettingItem(SettingItem::NETWORK_BLOCK_PCDN, value);
+                            bilibili::CDNHelper::BLOCK_PCDN = value;
+                        });
+
+    selectorCdnPrefer->init(
+        "wiliwili/setting/app/network/cdn_prefer"_i18n,
+        {"wiliwili/setting/app/network/cdn_auto"_i18n, "wiliwili/setting/app/network/cdn_aliyun"_i18n,
+         "wiliwili/setting/app/network/cdn_tencent"_i18n, "wiliwili/setting/app/network/cdn_huawei"_i18n,
+         "wiliwili/setting/app/network/cdn_bytedance"_i18n, "wiliwili/setting/app/network/cdn_baidu"_i18n},
+        conf.getIntOptionIndex(SettingItem::NETWORK_CDN_PREFER), [](int data) {
+            ProgramConfig::instance().setSettingItem(SettingItem::NETWORK_CDN_PREFER, data);
+            bilibili::CDNHelper::PREFER = data;
+            return true;
+        });
 
     /// AudioBandwidth
     auto bandwidthOption = conf.getOptionData(SettingItem::AUDIO_QUALITY);

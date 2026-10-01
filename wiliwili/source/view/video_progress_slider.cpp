@@ -189,6 +189,33 @@ void VideoProgressSlider::draw(NVGcontext* vg, float x, float y, float width, fl
         }
         child->frame(ctx);
     }
+
+    // 空降助手分段颜色标记：绘制在最上层，做成细条压在轨道中线上，
+    // 既能看到分段位置，又不会遮挡下方的已播放进度。
+    if (sponsorDuration > 0 && !sponsorSegments.empty()) {
+        const float paddingWidth = getWidth() - pointer->getWidth();
+        const float lineStart    = pointer->getWidth() / 2;
+        const float barHeight    = 5.0f;
+        const float barY         = y + height / 2 - barHeight / 2;
+
+        for (const auto& seg : sponsorSegments) {
+            float p0 = static_cast<float>(seg.start / sponsorDuration);
+            float p1 = static_cast<float>(seg.end / sponsorDuration);
+            if (p0 < 0) p0 = 0;
+            if (p1 > 1) p1 = 1;
+            if (p1 <= p0) continue;
+
+            const float bx = x + lineStart + paddingWidth * p0;
+            const float bw = paddingWidth * (p1 - p0);
+            if (bw < 1.0f) continue;
+
+            const uint32_t c = wiliwili::SponsorBlock::colorForCategory(seg.category);
+            nvgBeginPath(vg);
+            nvgRoundedRect(vg, bx, barY, bw, barHeight, barHeight / 2);
+            nvgFillColor(vg, a(nvgRGB((c >> 16) & 0xFF, (c >> 8) & 0xFF, c & 0xFF)));
+            nvgFill(vg);
+        }
+    }
 }
 
 void VideoProgressSlider::buttonsProcessing() {
@@ -263,4 +290,14 @@ void VideoProgressSlider::setManuallyMode() {
     pointer->setHideHighlightBackground(!pointerSelected);
     ignoreProgressSetting = pointerSelected;
     if (!pointerSelected) progressSetEvent.fire(this->progress);
+}
+
+void VideoProgressSlider::setSponsorSegments(const std::vector<wiliwili::SponsorSegment>& data, double duration) {
+    sponsorSegments = data;
+    sponsorDuration = duration;
+}
+
+void VideoProgressSlider::clearSponsorSegments() {
+    sponsorSegments.clear();
+    sponsorDuration = 0;
 }

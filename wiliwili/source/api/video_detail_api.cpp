@@ -7,8 +7,63 @@
 #include "bilibili/result/video_detail_result.h"
 #include "bilibili/result/home_live_result.h"
 #include "bilibili/result/home_pgc_season_result.h"
+#include "utils/cdn_helper.hpp"
 
 namespace bilibili {
+
+namespace {
+
+/// 对单个媒体的地址列表（主地址 + 备用地址）应用 CDN 优化并写回
+void optimizeMedia(DashMedia& media) {
+    std::vector<std::string> list;
+    list.reserve(media.backup_url.size() + 1);
+    if (!media.base_url.empty()) list.emplace_back(media.base_url);
+    for (const auto& u : media.backup_url) {
+        if (!u.empty()) list.emplace_back(u);
+    }
+    if (list.empty()) return;
+
+    auto filtered = CDNHelper::filter(list);
+    if (filtered.empty()) return;
+
+    media.base_url = filtered.front();
+    media.backup_url.assign(filtered.begin() + 1, filtered.end());
+}
+
+/**
+ * 对 playurl 的返回结果应用 CDN 优化：
+ *   - 屏蔽指向 PCDN 节点的地址
+ *   - 按用户在设置中选择的 CDN 偏好重排（优选地址排到最前）
+ *
+ * 处理范围覆盖 durl（音视频合并流）与 dash（分离流）的全部地址，
+ * 保证主地址与备用地址的顺序都被优化过。
+ */
+void applyCdnOptimize(VideoUrlResult& result) {
+    if (!CDNHelper::BLOCK_PCDN && CDNHelper::PREFER <= 0) return;
+
+    for (auto& durl : result.durl) {
+        std::vector<std::string> list;
+        list.reserve(durl.backup_url.size() + 1);
+        if (!durl.url.empty()) list.emplace_back(durl.url);
+        for (const auto& u : durl.backup_url) {
+            if (!u.empty()) list.emplace_back(u);
+        }
+        if (list.empty()) continue;
+
+        auto filtered = CDNHelper::filter(list);
+        if (filtered.empty()) continue;
+
+        durl.url = filtered.front();
+        durl.backup_url.assign(filtered.begin() + 1, filtered.end());
+    }
+
+    for (auto& media : result.dash.video) optimizeMedia(media);
+    for (auto& media : result.dash.audio) optimizeMedia(media);
+    for (auto& media : result.dash.dolby_audio) optimizeMedia(media);
+    optimizeMedia(result.dash.flac_audio);
+}
+
+}  // namespace
 
 void BilibiliClient::get_video_detail(const std::string& bvid, const std::function<void(VideoDetailResult)>& callback,
                                       const ErrorCallback& error) {
@@ -93,7 +148,11 @@ void BilibiliClient::get_video_url(const std::string& bvid, uint64_t cid, int qn
                                           {"fourk", "1"},
                                           {"fnval", FNVAL},
                                           {"fnver", "0"}},
-                                         callback, error);
+                                         [callback](VideoUrlResult result) {
+                                             applyCdnOptimize(result);
+                                             if (callback) callback(std::move(result));
+                                         },
+                                         error);
 }
 
 void BilibiliClient::get_video_url(uint64_t aid, uint64_t cid, int qn, const std::function<void(VideoUrlResult)>& callback,
@@ -112,7 +171,11 @@ void BilibiliClient::get_video_url(uint64_t aid, uint64_t cid, int qn, const std
                                           {"fourk", "1"},
                                           {"fnval", FNVAL},
                                           {"fnver", "0"}},
-                                         callback, error);
+                                         [callback](VideoUrlResult result) {
+                                             applyCdnOptimize(result);
+                                             if (callback) callback(std::move(result));
+                                         },
+                                         error);
 }
 
 void BilibiliClient::get_video_url_cast(uint64_t oid, uint64_t cid, int type, int qn, const std::string& csrf,

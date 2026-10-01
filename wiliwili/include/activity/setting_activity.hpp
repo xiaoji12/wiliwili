@@ -54,6 +54,13 @@ private:
     BRLS_BIND(brls::BooleanCell, btnKeymapSwap, "setting/keymap_swap");
     BRLS_BIND(brls::BooleanCell, btnOpencc, "setting/opencc");
     BRLS_BIND(brls::BooleanCell, btnQuality, "setting/video/quality");
+    // 空降助手（SponsorBlock）
+    BRLS_BIND(brls::BooleanCell, cellSponsorBlock, "setting/sponsor/block");
+    BRLS_BIND(BiliSelectorCell, selectorSponsorCategories, "setting/sponsor/categories");
+    BRLS_BIND(brls::BooleanCell, cellSponsorProgressBar, "setting/sponsor/progress_bar");
+    // B 站播放地址优化
+    BRLS_BIND(brls::BooleanCell, cellBlockPcdn, "setting/network/pcdn");
+    BRLS_BIND(BiliSelectorCell, selectorCdnPrefer, "setting/network/cdn");
     BRLS_BIND(brls::BooleanCell, btnHWDEC, "setting/video/hwdec");
     BRLS_BIND(brls::BooleanCell, btnAutoPlay, "setting/video/auto_play");
     BRLS_BIND(brls::BooleanCell, btnAutoFullscreen, "setting/video/auto_fullscreen");

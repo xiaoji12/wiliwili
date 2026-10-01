@@ -1,3 +1,14 @@
+> ## ⚠️ 这是 AI 生成的二次开发分支
+>
+> 本仓库是 [wiliwili](https://github.com/xfangfang/wiliwili) 的 fork，
+> **所有新增与修改的代码 100% 由 AI（WorkBuddy AI）生成**，人工仅提出需求与验收，未手写任何代码。
+>
+> **新增功能**：SponsorBlock 空降助手 · 进度条分段着色 · B 站 CDN 优化（屏蔽 PCDN）
+>
+> 完整引用清单与 AI 声明见 **[CREDITS.md](CREDITS.md)**。
+
+- - -
+
 <p align="center">
     <img src="resources/svg/cn.xfangfang.wiliwili.svg" alt="logo" height="128" width="128"/>
 </p>
