@@ -195,7 +195,11 @@ void BilibiliClient::get_video_url_cast(uint64_t oid, uint64_t cid, int type, in
                                           {"cid", std::to_string(cid)},
                                           {"qn", std::to_string(qn)},
                                           {"fourk", "1"}},
-                                         callback, error, true);
+                                         [callback](VideoUrlResult result) {
+                                             applyCdnOptimize(result);
+                                             if (callback) callback(std::move(result));
+                                         },
+                                         error, true);
 }
 
 void BilibiliClient::get_comment(const std::string& oid, int next, int mode, int type,
@@ -270,7 +274,13 @@ void BilibiliClient::get_season_url(uint64_t cid, int qn, const std::function<vo
              {"fourk",         "1"},
              {"fnval",         FNVAL},
              {"fnver",         "0"}},
-            callback, error);
+            [callback](SeasonUrlResult result) {
+                // 番剧 / 影视（PGC）走的是 SeasonUrl2 接口，同样会混入 PCDN 地址，
+                // 需要和普通视频一样做一次过滤与优选。
+                applyCdnOptimize(result.video_info);
+                if (callback) callback(std::move(result));
+            },
+            error);
 }
 
 void BilibiliClient::get_live_url(int roomid, int qn, const std::function<void(LiveUrlResultWrapper)>& callback,

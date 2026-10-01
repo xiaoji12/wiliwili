@@ -1,7 +1,7 @@
 # 致谢与第三方引用
 
 本仓库是基于 **wiliwili** 的二次开发分支，新增了 SponsorBlock（空降助手，采用官方同款分段配色）、
-进度条分段着色、B 站 CDN 优化（屏蔽 PCDN）、稍后再看一键加入/移除等功能。
+进度条分段着色、B 站 CDN 优化（彻底屏蔽 PCDN / MCDN）、稍后再看一键加入/移除等功能。
 
 > **本仓库的全部新增与修改代码均由 AI 生成**，详见文末 [AI 声明](#三ai-声明)。
 
@@ -38,6 +38,27 @@
     预告 `#008FD6` 浅蓝 / 离题 `#7300FF` 紫罗兰 / 非音乐部分 `#FF9900` 橙 /
     高能时刻 `#FF1684` 粉 / 独占内容 `#008A5C` 深绿）
   - 「只发送视频 ID 哈希前缀以保护隐私」的设计思路亦源自该项目
+
+### 4. B 站 PCDN / MCDN 域名清单来源
+
+- 参考仓库：[Li-Dong-Don/AdGuard-BiliCDN-Rules](https://github.com/Li-Dong-Don/AdGuard-BiliCDN-Rules)
+  与社区（AdGuard / Clash 规则集、B 站播放优化类博客）公开的实测数据。
+- 引用方式：**仅参考其公开的域名清单作为屏蔽目标**，代码为独立实现（纯 C++ 字符串匹配，
+  未引入任何 DNS 代理或外部过滤组件）。
+
+本仓库内置屏蔽的 PCDN / MCDN 供应商：
+
+| 供应商 | 域名 | 典型端口 |
+|---|---|---|
+| 京东云无线宝（MCDN） | `*.mcdn.bilivideo.cn`、`*.mcdn.bilivideo.com` | 8082 |
+| B 站 pcdn 前缀域名 | `*.pcdn.bilivideo.cn`、`*.pcdn.bilivideo.com` | — |
+| 迅雷 / 网心云 | `*.edge.mountaintoys.cn`、`*.xycdn.com`、`*.onethingpcs.com` | 4483 |
+| 节点之家（深圳百达云） | `*.szbdyd.com` | 9305 |
+| 派欧云 PPIO | `*.nexusedgeio.com`、`*.ppio.cloud` | 任意 |
+| 京东云 CDN | `*.jdcloudcdn.com` | — |
+| 兜底规则 | 主机名含 `pcdn` / `mcdn` / `p2p`；或使用非 80/443 端口的非官方域名（含裸 IP） | 任意 |
+
+> 兜底规则用于覆盖后续新出现的 PCDN 供应商，无需等待清单更新。
 
 ---
 
@@ -98,7 +119,8 @@
 
 | 类别 | 文件 |
 |---|---|
-| 功能接入 | `player_base_activity.cpp`、`player_activity.{hpp,cpp}`、`player_activity.xml`、`video_view.{hpp,cpp}`、`video_progress_slider.{hpp,cpp}`、`video_detail_api.cpp` |
+| 功能接入 | `player_base_activity.cpp`、`player_activity.{hpp,cpp}`、`player_activity.xml`、`video_view.{hpp,cpp}`、`video_progress_slider.{hpp,cpp}` |
+| CDN / PCDN | `video_detail_api.cpp`（普通视频 + 番剧 + 投屏）、`live_player_activity.cpp`（直播） |
 | 稍后再看 API | `bilibili/api.h`、`bilibili.h`、`mine_api.cpp` |
 | 配置项 | `config_helper.{hpp,cpp}`（新增 4 个配置键） |
 | 设置界面 | `setting_activity.{hpp,cpp}`、`setting_activity.xml` |
@@ -111,7 +133,8 @@ AI 生成的代码存在以下**未验证项**：
 
 - 未做真机 GUI 启动测试（仅通过静态依赖校验）
 - 进度条着色未在真实播放中肉眼确认
-- PCDN 过滤未用真实 playurl 响应验证
+- PCDN 过滤规则已用 26 条离线用例验证（`_research/verify_pcdn.cpp`），
+  但未接入真实 playurl 响应做端到端验证
 
 使用前请自行评估。
 

@@ -16,6 +16,7 @@
 #include "utils/shader_helper.hpp"
 #include "utils/config_helper.hpp"
 #include "utils/dialog_helper.hpp"
+#include "utils/cdn_helper.hpp"
 
 #include "view/video_view.hpp"
 #include "view/live_core.hpp"
@@ -370,13 +371,29 @@ void LiveActivity::onLiveData(const bilibili::LiveRoomPlayInfo &result)
             });
     }
 
-    // todo: 允许使用备用链接
+    // 直播地址同样可能落在 PCDN 节点上：优先挑选非 PCDN 的地址，
+    // 若全部都是 PCDN 则退回第一个，避免直接无法播放。
+    std::string fallbackUrl;
     for (const auto& i : liveUrl.url_info) {
         auto url = i.host + liveUrl.base_url + i.extra;
+        if (url.empty()) continue;
+
+        if (fallbackUrl.empty()) fallbackUrl = url;
+
+        if (bilibili::CDNHelper::isPcdn(url)) {
+            brls::Logger::debug("Skip PCDN live stream url: {}", url);
+            continue;
+        }
 
         // 设置视频链接
         brls::Logger::debug("Live stream url: {}", url);
         this->video->setUrl(url);
+        return;
+    }
+
+    if (!fallbackUrl.empty()) {
+        brls::Logger::debug("All live urls are PCDN, fallback to: {}", fallbackUrl);
+        this->video->setUrl(fallbackUrl);
         return;
     }
 
