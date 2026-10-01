@@ -1,0 +1,100 @@
+name: Release CN (SponsorBlock)
+
+# 专用发布流水线：
+#   仅构建本机无法完成的 Linux x86_64 Flatpak（Steam Deck 可用），
+#   并把产物挂到指定 tag 的 GitHub Release 上。
+#   Windows 版本由本地 UCRT64 工具链构建后单独上传。
+#
+# 上游 build.yaml 的 release job 依赖 build-switch / build-macos 全部成功，
+# 任一失败即不发布，故此处不复用，改为独立、最小化的发布链路。
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag / version, e.g. v1.6.0-cn'
+        required: true
+        default: 'v1.6.0-cn'
+      upload_release:
+        description: 'Create or update the GitHub Release with the built artifact'
+        required: false
+        default: 'true'
+
+permissions:
+  contents: write
+
+jobs:
+  version:
+    name: Resolve names
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.info.outputs.tag }}
+      flatpak_name: ${{ steps.info.outputs.flatpak_name }}
+    steps:
+      - name: Compute artifact names
+        id: info
+        run: |
+          TAG="${{ github.event.inputs.tag }}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "flatpak_name=wiliwili-Linux-${TAG}-x86_64" >> "$GITHUB_OUTPUT"
+          echo "resolved tag=${TAG}"
+
+  build-flatpak-x86_64:
+    name: Build Flatpak (x86_64)
+    needs: [ version ]
+    runs-on: ubuntu-24.04
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-25.08
+      options: --privileged
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Generate gamepad mappings
+        run: |
+          BRLS_GLFW="library/borealis/library/lib/extern/glfw/"
+          cmake -P ${BRLS_GLFW}/CMake/GenerateMappings.cmake ${BRLS_GLFW}/src/mappings.h.in ${BRLS_GLFW}/src/mappings.h
+
+      - name: Build Flatpak
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6.7
+        with:
+          bundle: ${{ needs.version.outputs.flatpak_name }}.flatpak
+          manifest-path: .flatpak-manifest.yml
+          cache-key: flatpak-cn-x86_64-${{ hashFiles('.flatpak-manifest.yml') }}
+          verbose: true
+          arch: x86_64
+          upload-artifact: false
+
+      - name: Upload Flatpak artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: flatpak-x86_64
+          path: ${{ needs.version.outputs.flatpak_name }}.flatpak
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    name: Publish Release
+    needs: [ version, build-flatpak-x86_64 ]
+    if: github.event.inputs.upload_release == 'true' && !cancelled()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+
+      - name: List downloaded artifacts
+        run: find dist -type f -exec ls -lh {} \;
+
+      - name: Attach Flatpak to Release
+        uses: ncipollo/release-action@v1
+        with:
+          name: wiliwili ${{ needs.version.outputs.tag }}
+          tag: ${{ needs.version.outputs.tag }}
+          allowUpdates: true
+          omitBodyDuringUpdate: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: dist/flatpak-x86_64/*.flatpak
