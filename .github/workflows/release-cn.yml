@@ -7,8 +7,16 @@ name: Release CN (SponsorBlock)
 #
 # 上游 build.yaml 的 release job 依赖 build-switch / build-macos 全部成功，
 # 任一失败即不发布，故此处不复用，改为独立、最小化的发布链路。
+#
+# 说明：release 步骤改用 `gh release upload` 而非第三方 action，
+#       因为 action 的 artifacts glob 不匹配时会静默跳过（artifactErrorsFailBuild 默认 false），
+#       导致 job 报成功但资产并未上传。gh CLI 会以非零退出码明确失败。
 
 on:
+  # 修改本文件即自动重跑，便于修复 CI 自身的问题
+  push:
+    paths:
+      - '.github/workflows/release-cn.yml'
   workflow_dispatch:
     inputs:
       tag:
@@ -33,8 +41,10 @@ jobs:
     steps:
       - name: Compute artifact names
         id: info
+        env:
+          INPUT_TAG: ${{ github.event.inputs.tag }}
         run: |
-          TAG="${{ github.event.inputs.tag }}"
+          TAG="${INPUT_TAG:-v1.6.0-cn}"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           echo "flatpak_name=wiliwili-Linux-${TAG}-x86_64" >> "$GITHUB_OUTPUT"
           echo "resolved tag=${TAG}"
@@ -68,6 +78,9 @@ jobs:
           arch: x86_64
           upload-artifact: false
 
+      - name: Verify bundle exists
+        run: ls -lh "${{ needs.version.outputs.flatpak_name }}.flatpak"
+
       - name: Upload Flatpak artifact
         uses: actions/upload-artifact@v6
         with:
@@ -79,22 +92,26 @@ jobs:
   release:
     name: Publish Release
     needs: [ version, build-flatpak-x86_64 ]
-    if: github.event.inputs.upload_release == 'true' && !cancelled()
+    if: github.event.inputs.upload_release != 'false' && !cancelled()
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v8
+      - name: Download Flatpak artifact
+        uses: actions/download-artifact@v8
         with:
+          name: flatpak-x86_64
           path: dist
 
-      - name: List downloaded artifacts
-        run: find dist -type f -exec ls -lh {} \;
+      - name: Inspect downloaded files
+        run: ls -lhR dist
 
       - name: Attach Flatpak to Release
-        uses: ncipollo/release-action@v1
-        with:
-          name: wiliwili ${{ needs.version.outputs.tag }}
-          tag: ${{ needs.version.outputs.tag }}
-          allowUpdates: true
-          omitBodyDuringUpdate: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: dist/flatpak-x86_64/*.flatpak
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.version.outputs.tag }}
+        run: |
+          set -euxo pipefail
+          gh release view "$TAG" >/dev/null 2>&1 \
+            || gh release create "$TAG" --title "wiliwili $TAG" --notes "Built by GitHub Actions."
+          gh release upload "$TAG" dist/*.flatpak --clobber
+          echo "--- assets on release $TAG ---"
+          gh release view "$TAG" --json assets --jq '.assets[] | "\(.name)  \(.size) bytes"'
