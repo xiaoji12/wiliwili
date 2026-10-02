@@ -125,12 +125,14 @@ Android 支持**不是**本仓库发明的，而是 borealis 自带的能力。�
 
 ### 具体由 AI 生成的内容
 
-**新增文件（9 个）**
+**新增文件（12 个）**
 
 | 文件 | 说明 |
 |---|---|
-| `wiliwili/include/api/sponsor_block.hpp` | 空降助手接口定义 |
-| `wiliwili/source/api/sponsor_block.cpp` | 空降助手实现（请求 / 解析 / 跳过 / 官方配色） |
+| `wiliwili/include/api/sponsor_block.hpp` | 空降助手接口定义（读取 + 提交） |
+| `wiliwili/source/api/sponsor_block.cpp` | 空降助手实现（请求 / 解析 / 跳过 / 官方配色 / 片段提交） |
+| `wiliwili/include/view/sponsor_submit_dialog.hpp` | 提交空降助手片段对话框接口 |
+| `wiliwili/source/view/sponsor_submit_dialog.cpp` | 提交对话框实现（起止点标记 / 分类选择 / 上报） |
 | `wiliwili/include/utils/sha256_helper.hpp` | SHA-256 接口 |
 | `wiliwili/source/utils/sha256_helper.cpp` | 自包含 SHA-256 实现（FIPS 180-4） |
 | `wiliwili/include/utils/cdn_helper.hpp` | CDN 优化接口 |
@@ -138,6 +140,7 @@ Android 支持**不是**本仓库发明的，而是 borealis 自带的能力。�
 | `wiliwili/include/utils/watch_later_helper.hpp` | 稍后再看状态缓存接口 |
 | `wiliwili/source/utils/watch_later_helper.cpp` | 稍后再看加入 / 移除 / 列表缓存实现 |
 | `resources/svg/bpx-svg-sprite-later(-active).svg` | 稍后再看按钮图标（普通 / 激活态） |
+| `resources/svg/bpx-svg-sprite-sponsor-submit.svg` | 提交片段按钮图标（上传） |
 
 **Android 平台新增文件（工程共 30 个文件）**
 
@@ -151,14 +154,14 @@ Android 支持**不是**本仓库发明的，而是 borealis 自带的能力。�
 | CI / 脚本 | `.ci/prepare_mpv.sh`、`.github/workflows/android.yml` |
 | 文档 | `android-project/README.md` |
 
-**修改文件（28 个）**
+**修改文件（29 个）**
 
 | 类别 | 文件 |
 |---|---|
-| 功能接入 | `player_base_activity.cpp`、`player_activity.{hpp,cpp}`、`player_activity.xml`、`video_view.{hpp,cpp}`、`video_progress_slider.{hpp,cpp}` |
+| 功能接入 | `player_base_activity.cpp`、`player_activity.{hpp,cpp}`、`player_activity.xml`、`player_season_activity.cpp`（顺带修掉番剧页「稍后再看」死按钮）、`video_view.{hpp,cpp}`、`video_progress_slider.{hpp,cpp}` |
 | CDN / PCDN | `video_detail_api.cpp`（普通视频 + 番剧 + 投屏）、`live_player_activity.cpp`（直播） |
 | 稍后再看 API | `bilibili/api.h`、`bilibili.h`、`mine_api.cpp` |
-| 配置项 | `config_helper.{hpp,cpp}`（新增 4 个配置键） |
+| 配置项 | `config_helper.{hpp,cpp}`（新增 5 个配置键，含提交用的匿名 `player_sponsor_user_id`） |
 | 设置界面 | `setting_activity.{hpp,cpp}`、`setting_activity.xml` |
 | 多语言 | 7 种语言的 `wiliwili.json` |
 | 构建 / CI | `CMakeLists.txt`、`.github/workflows/release-cn.yml`、`.github/workflows/android.yml`、`.gitignore` |
@@ -177,6 +180,9 @@ AI 生成的代码存在以下**未验证项**：
 - 手柄与遥控器的按键映射结论来自对 `sdl_input.cpp`、
   `SDLControllerManager.java`、`SDL_androidkeyboard.c` 的**源码走查**，
   未做真实设备实测
+- **片段提交功能未做过一次真实的成功上报**：只做了接口层的非法请求探测
+  （空体 → `400 No userID provided`；带 `userID` 空 `segments` → `400 No valid segments.`），
+  证明服务端会解析 `userID` 并校验 `segments`，但成功路径未端到端验证
 
 使用前请自行评估。
 
