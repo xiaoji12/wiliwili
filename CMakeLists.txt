@@ -84,7 +84,7 @@ add_definitions(-DFONS_HASH_LUT_SIZE=4096)
 project(wiliwili)
 set(VERSION_MAJOR "1")
 set(VERSION_MINOR "6")
-set(VERSION_REVISION "2")
+set(VERSION_REVISION "3")
 if (NOT VERSION_BUILD)
     set(VERSION_BUILD "0")
 endif ()
@@ -216,6 +216,7 @@ set_source_files_properties(
         wiliwili/source/utils/cdn_helper.cpp
         wiliwili/source/utils/watch_later_helper.cpp
         wiliwili/source/api/sponsor_block.cpp
+        wiliwili/source/view/sponsor_submit_dialog.cpp
         PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
 
 # building release file

@@ -10,10 +10,18 @@
 //   只发送 4 位哈希前缀是为了避免向第三方泄露用户观看的完整视频 ID。
 //   无数据时返回 HTTP 404。
 //
+//   POST {SERVER}/api/skipSegments
+//   提交一个分段，body 为
+//     { videoID, cid, userID, segments: [{cid, segment:[s,e], UUID, category, actionType}],
+//       videoDuration, userAgent }
+//   成功时返回 200 + 与提交数量等长的分段数组（含服务端分配的 UUID）。
+//   提交使用本地随机生成的匿名 userID，不需要登录 B 站账号。
+//
 
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -27,6 +35,14 @@ struct SponsorSegment {
     std::string uuid;       // 服务端分段 UUID
     std::string category;   // 分类，如 sponsor / intro / outro
     std::string actionType; // 动作类型，目前只处理 skip / poi
+};
+
+/// 提交失败的原因，交由 UI 层翻译成提示文案
+enum class SponsorSubmitError {
+    None,      // 成功
+    Invalid,   // 本地参数不合法（起止时间倒置、视频 ID 为空等）
+    Network,   // 网络错误 / 超时
+    Rejected,  // 服务端拒绝（非 200）
 };
 
 class SponsorBlock {
@@ -59,6 +75,32 @@ public:
      * 避免在每帧的绘制路径上反复加锁。
      */
     uint64_t getVersion();
+
+    /**
+     * 提交一个分段到服务端。
+     * 异步执行，callback 在 cpr 的后台线程里被调用，UI 侧需要自行切回主线程。
+     * 提交成功后会把该分段并入本地列表，进度条上立即生效。
+     *
+     * @param bvid          视频 ID
+     * @param cid           分 P ID
+     * @param start         起始时间（秒）
+     * @param end           结束时间（秒）
+     * @param category      分类，取值见 submittableCategories()
+     * @param videoDuration 视频总时长（秒），用于服务端做范围校验
+     * @param callback      (是否成功, 失败原因)
+     */
+    void submit(const std::string& bvid, int64_t cid, double start, double end, const std::string& category,
+                double videoDuration, std::function<void(bool, SponsorSubmitError)> callback);
+
+    /// 允许提交的分类（顺序即提交对话框里下拉框的顺序）
+    static const std::vector<std::string>& submittableCategories();
+
+    /**
+     * 提交用的匿名用户 ID（36 位随机字符）。
+     * 首次调用时生成并写入配置，之后保持不变；
+     * 与 BilibiliSponsorBlock 的做法一致，不包含任何可识别用户的信息。
+     */
+    static std::string userID();
 
     /// 分类对应的进度条标记颜色，返回 0xRRGGBB
     static uint32_t colorForCategory(const std::string& category);
@@ -95,6 +137,12 @@ private:
 
     /// 解析响应并过滤出当前视频的分段
     void applySegments(const std::string& body, const std::string& bvid);
+
+    /// 提交成功后把新分段并入本地列表（仅在仍是同一个视频时生效）
+    void addLocalSegment(const std::string& bvid, const SponsorSegment& seg);
+
+    /// 生成 36 位随机字符串，用于 userID 与本地分段 UUID
+    static std::string randomId(size_t length);
 
     std::mutex mtx;
 

@@ -214,6 +214,34 @@
                                     wireframe="false"
                                     text="@i18n/wiliwili/player/watch_later/add"/>
                         </brls:Box>
+
+                        <brls:Box
+                                highlightCornerRadius="50"
+                                cornerRadius="50"
+                                padding="4"
+                                width="56"
+                                height="56"
+                                axis="column"
+                                alignItems="center"
+                                focusable="true">
+                            <SVGImage
+                                    id="video/btn/sponsor"
+                                    positionTop="4"
+                                    width="40"
+                                    height="40"
+                                    SVG="@res/svg/bpx-svg-sprite-sponsor-submit.svg"/>
+                            <brls:Label
+                                    id="video/label/sponsor"
+                                    positionType="absolute"
+                                    positionBottom="-30"
+                                    culled="false"
+                                    width="120"
+                                    horizontalAlign="center"
+                                    textColor="@theme/font/grey"
+                                    fontSize="16"
+                                    wireframe="false"
+                                    text="@i18n/wiliwili/player/sponsor_submit/button"/>
+                        </brls:Box>
                     </brls:Box>
                 </brls:Box>
 

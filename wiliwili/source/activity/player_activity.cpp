@@ -25,6 +25,7 @@
 #include "view/video_card.hpp"
 #include "view/user_info.hpp"
 #include "view/mpv_core.hpp"
+#include "view/sponsor_submit_dialog.hpp"
 
 using namespace brls::literals;
 
@@ -197,6 +198,9 @@ void PlayerActivity::onContentAvailable() {
     // 稍后再看按钮（加入 / 移除）
     this->setupWatchLaterButton();
 
+    // 提交空降助手片段
+    this->setupSponsorSubmitButton();
+
     // 用户头像框
     this->videoUserInfo->registerClickAction([this](...) {
         if (!DialogHelper::checkLogin()) return true;
@@ -275,6 +279,31 @@ void PlayerActivity::updateWatchLaterButton() {
                                               : "svg/bpx-svg-sprite-later.svg");
     this->labelLater->setText(inList ? "wiliwili/player/watch_later/in_list"_i18n
                                      : "wiliwili/player/watch_later/add"_i18n);
+}
+
+void PlayerActivity::setupSponsorSubmitButton() {
+    if (!this->btnSponsor) return;
+
+    auto* sponsorBox = this->btnSponsor->getParent();
+    if (!sponsorBox) return;
+
+    sponsorBox->setVisibility(brls::Visibility::VISIBLE);
+    sponsorBox->addGestureRecognizer(new brls::TapGestureRecognizer(sponsorBox));
+
+    sponsorBox->registerClickAction([this](brls::View*) {
+        const std::string bvid = this->videoDetailResult.bvid;
+        if (bvid.empty()) return true;
+
+        // 普通视频用当前分 P 的 cid
+        const int64_t cid = static_cast<int64_t>(this->videoDetailPage.cid);
+
+        auto* content = new wiliwili::SponsorSubmitDialog(
+            bvid, cid, static_cast<double>(MPVCore::instance().duration));
+        auto* dialog = new brls::Dialog(content);
+        dialog->addButton("hints/cancel"_i18n, []() {});
+        dialog->open();
+        return true;
+    });
 }
 
 void PlayerActivity::onVideoInfo(const bilibili::VideoDetailResult& result) {

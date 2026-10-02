@@ -505,6 +505,29 @@
       "added": "Aggiunto a Guarda più tardi",
       "removed": "Rimosso da Guarda più tardi",
       "failed": "Operazione Guarda più tardi non riuscita, riprova"
+    },
+    "sponsor_submit": {
+      "button": "Invia",
+      "title": "Invia un segmento a SponsorBlock",
+      "start": "Inizio",
+      "end": "Fine",
+      "category": "Categoria",
+      "now": "Posizione attuale",
+      "hint": "Premi «Inizio» o «Fine» per impostare quel punto sulla posizione di riproduzione attuale. Il video continua a riprodursi, quindi puoi segnare l'inizio, attendere la fine del segmento e poi segnare la fine. Dopo l'invio il segmento compare subito sulla barra di avanzamento.",
+      "submit": "Invia",
+      "ok": "Segmento inviato, grazie per il contributo",
+      "failed": "Invio non riuscito, riprova più tardi",
+      "network_failed": "Errore di rete, invio non riuscito",
+      "invalid_range": "Segna prima inizio e fine; la fine deve essere successiva all'inizio",
+      "cat_sponsor": "Sponsor",
+      "cat_selfpromo": "Autopromozione",
+      "cat_interaction": "Invito all'interazione",
+      "cat_intro": "Introduzione",
+      "cat_outro": "Conclusione",
+      "cat_preview": "Anteprima/Riepilogo",
+      "cat_filler": "Divagazione",
+      "cat_music_offtopic": "Parte non musicale",
+      "cat_poi_highlight": "Momento saliente"
     }
   },
   "dialog": {

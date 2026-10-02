@@ -505,6 +505,29 @@
       "added": "Added to Watch Later",
       "removed": "Removed from Watch Later",
       "failed": "Watch Later action failed, please retry"
+    },
+    "sponsor_submit": {
+      "button": "Submit",
+      "title": "Submit a SponsorBlock segment",
+      "start": "Start",
+      "end": "End",
+      "category": "Category",
+      "now": "Current position",
+      "hint": "Press Start or End to set that point to the current playback position. The video keeps playing, so you can mark the start, wait for the segment to finish, then mark the end. The segment appears on the progress bar right after submitting.",
+      "submit": "Submit",
+      "ok": "Segment submitted, thanks for contributing",
+      "failed": "Submission failed, please try again later",
+      "network_failed": "Network error, submission failed",
+      "invalid_range": "Mark both the start and the end first, and the end must be later than the start",
+      "cat_sponsor": "Sponsor",
+      "cat_selfpromo": "Unpaid/Self Promotion",
+      "cat_interaction": "Interaction Reminder",
+      "cat_intro": "Intro",
+      "cat_outro": "Outro",
+      "cat_preview": "Preview/Recap",
+      "cat_filler": "Filler Tangent",
+      "cat_music_offtopic": "Non-Music Section",
+      "cat_poi_highlight": "Highlight"
     }
   },
   "dialog": {

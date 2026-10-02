@@ -48,6 +48,7 @@ enum class SettingItem {
     PLAYER_SPONSOR_CATEGORIES,   // 空降助手：参与跳过的分类（逗号分隔）
     PLAYER_SPONSOR_PROGRESS_BAR, // 空降助手：在进度条上显示分段颜色标记
     PLAYER_SPONSOR_PRESET,       // 空降助手：跳过分类预设（设置页下拉框索引）
+    PLAYER_SPONSOR_USER_ID,      // 空降助手：提交分段用的匿名用户 ID（36 位随机串）
     PLAYER_LOW_QUALITY,
     PLAYER_INMEMORY_CACHE,
     PLAYER_HWDEC,

@@ -123,11 +123,13 @@ protected:
     BRLS_BIND(SVGImage, btnFavorite, "video/btn/favorite");
     BRLS_BIND(SVGImage, btnQR, "video/btn/qr");
     BRLS_BIND(SVGImage, btnLater, "video/btn/later");
+    BRLS_BIND(SVGImage, btnSponsor, "video/btn/sponsor");
     BRLS_BIND(brls::Label, labelAgree, "video/label/agree");
     BRLS_BIND(brls::Label, labelCoin, "video/label/coin");
     BRLS_BIND(brls::Label, labelFavorite, "video/label/favorite");
     BRLS_BIND(brls::Label, labelQR, "video/label/qr");
     BRLS_BIND(brls::Label, labelLater, "video/label/later");
+    BRLS_BIND(brls::Label, labelSponsor, "video/label/sponsor");
 
     // 监控mpv事件
     MPVEvent::Subscription eventSubscribeID;
@@ -178,6 +180,9 @@ private:
 
     // 依据本地缓存刷新「稍后再看」按钮的图标与文案
     void updateWatchLaterButton();
+
+    // 初始化「提交空降助手片段」按钮
+    void setupSponsorSubmitButton();
 };
 
 class PlayerSeasonActivity : public BasePlayerActivity {

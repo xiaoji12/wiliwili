@@ -7,12 +7,14 @@
 #include <algorithm>
 #include <cmath>
 #include <memory>
+#include <random>
 
 #include <borealis.hpp>
 #include <cpr/cpr.h>
 #include <nlohmann/json.hpp>
 
 #include "api/bilibili/util/http.hpp"
+#include "utils/config_helper.hpp"
 #include "utils/sha256_helper.hpp"
 #include "view/mpv_core.hpp"
 
@@ -232,6 +234,143 @@ std::string SponsorBlock::categoryName(const std::string& category) {
     if (category == "poi_highlight") return "已跳过: 高能时刻";
     if (category == "exclusive_access") return "已跳过: 独占内容";
     return "已跳过: " + category;
+}
+
+const std::vector<std::string>& SponsorBlock::submittableCategories() {
+    // 与上游 BilibiliSponsorBlock 的提交分类保持一致，顺序即提交对话框里的顺序。
+    // 这里不放 exclusive_access：它需要「独占内容」的额外授权说明，误提交率高。
+    static const std::vector<std::string> list = {
+        "sponsor",  "selfpromo",  "interaction",   "intro",         "outro",
+        "preview",  "filler",     "music_offtopic", "poi_highlight",
+    };
+    return list;
+}
+
+std::string SponsorBlock::randomId(size_t length) {
+    static const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    static std::mt19937_64 gen{std::random_device{}()};
+    static std::mutex genMtx;
+
+    std::lock_guard<std::mutex> lock(genMtx);
+    std::uniform_int_distribution<size_t> dist(0, sizeof(charset) - 2);
+
+    std::string result;
+    result.reserve(length);
+    for (size_t i = 0; i < length; ++i) result.push_back(charset[dist(gen)]);
+    return result;
+}
+
+std::string SponsorBlock::userID() {
+    auto& conf = ProgramConfig::instance();
+
+    // 长度不对（首次运行、配置被清空或被手工改坏）就重新生成一个
+    std::string id = conf.getSettingItem<std::string>(SettingItem::PLAYER_SPONSOR_USER_ID, std::string{});
+    if (id.size() == 36) return id;
+
+    id = randomId(36);
+    conf.setSettingItem(SettingItem::PLAYER_SPONSOR_USER_ID, id);
+    brls::Logger::info("SponsorBlock: generated a new anonymous user ID");
+    return id;
+}
+
+void SponsorBlock::addLocalSegment(const std::string& bvid, const SponsorSegment& seg) {
+    std::lock_guard<std::mutex> lock(mtx);
+    // 提交期间可能已经切到别的视频，丢弃
+    if (currentBvid != bvid) return;
+
+    segments.emplace_back(seg);
+    std::sort(segments.begin(), segments.end(),
+              [](const SponsorSegment& a, const SponsorSegment& b) { return a.start < b.start; });
+    skipped.assign(segments.size(), false);
+    ++version;
+}
+
+void SponsorBlock::submit(const std::string& bvid, int64_t cid, double start, double end, const std::string& category,
+                          double videoDuration, std::function<void(bool, SponsorSubmitError)> callback) {
+    auto done = [callback](bool ok, SponsorSubmitError err) {
+        if (callback) callback(ok, err);
+    };
+
+    if (bvid.empty() || end <= start || start < 0) {
+        brls::Logger::warning("SponsorBlock: invalid submission {:.1f} -> {:.1f}", start, end);
+        done(false, SponsorSubmitError::Invalid);
+        return;
+    }
+
+    // 服务端要求 segment 落在 [0, duration] 内
+    if (videoDuration > 0 && end > videoDuration) end = videoDuration;
+    if (end <= start) {
+        done(false, SponsorSubmitError::Invalid);
+        return;
+    }
+
+    const std::string actionType = category == "poi_highlight" ? "poi" : "skip";
+    const std::string localUuid  = randomId(36);
+
+    // 注意：协议里 cid 是字符串而不是数字
+    // （上游 BilibiliSponsorBlock 的 `type CID = string`，服务端返回的也是 "cid":"30808542485"）
+    const std::string cidStr = std::to_string(cid);
+
+    nlohmann::json segment;
+    segment["cid"]        = cidStr;
+    segment["segment"]    = nlohmann::json::array({start, end});
+    segment["UUID"]       = localUuid;
+    segment["category"]   = category;
+    segment["actionType"] = actionType;
+
+    nlohmann::json body;
+    body["videoID"]       = bvid;
+    body["cid"]           = cidStr;
+    body["userID"]        = userID();
+    body["segments"]      = nlohmann::json::array({segment});
+    body["videoDuration"] = videoDuration;
+    body["userAgent"]     = "wiliwili/" + APPVersion::instance().getVersionStr();
+
+    // 与 GET 一样使用独立 session：不要带上 B 站的 Referer / Origin
+    auto session = std::make_shared<cpr::Session>();
+    session->SetUrl(cpr::Url{SERVER + "/api/skipSegments"});
+    session->SetHeader(cpr::Header{{"User-Agent", "wiliwili"}, {"Content-Type", "application/json"}});
+    session->SetBody(cpr::Body{body.dump()});
+    session->SetTimeout(cpr::Timeout{SPONSOR_TIMEOUT_MS});
+    session->SetConnectTimeout(cpr::ConnectTimeout{SPONSOR_TIMEOUT_MS});
+    session->SetProxies(bilibili::HTTP::PROXIES);
+    session->SetVerifySsl(bilibili::HTTP::VERIFY);
+
+    session->PostCallback([this, bvid, category, actionType, localUuid, start, end,
+                           done](const cpr::Response& r) {
+        if (r.error) {
+            brls::Logger::warning("SponsorBlock: submit failed: {}", r.error.message);
+            done(false, SponsorSubmitError::Network);
+            return;
+        }
+        if (r.status_code != 200) {
+            brls::Logger::warning("SponsorBlock: submit rejected, http {}", r.status_code);
+            done(false, SponsorSubmitError::Rejected);
+            return;
+        }
+
+        // 成功时服务端返回与提交数量等长的数组，带上它分配的 UUID
+        SponsorSegment seg;
+        seg.start      = start;
+        seg.end        = end;
+        seg.category   = category;
+        seg.actionType = actionType;
+        seg.uuid       = localUuid;
+
+        try {
+            auto root = nlohmann::json::parse(r.text);
+            if (root.is_array() && !root.empty() && root[0].is_object()) {
+                seg.uuid = root[0].value("UUID", localUuid);
+            }
+        } catch (const std::exception& e) {
+            // 返回值解析失败不影响提交本身，本地 UUID 继续用
+            brls::Logger::warning("SponsorBlock: submit response parse error: {}", e.what());
+        }
+
+        this->addLocalSegment(bvid, seg);
+        brls::Logger::info("SponsorBlock: submitted [{}] {:.1f}s -> {:.1f}s for {}", category, start, end, bvid);
+        done(true, SponsorSubmitError::None);
+    });
 }
 
 }  // namespace wiliwili

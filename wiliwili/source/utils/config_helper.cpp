@@ -197,6 +197,7 @@ std::unordered_map<SettingItem, ProgramOption> ProgramConfig::SETTING_MAP = {
     {SettingItem::PLAYER_SPONSOR_CATEGORIES, {"player_sponsor_categories", {}, {}, 1}},
     {SettingItem::PLAYER_SPONSOR_PROGRESS_BAR, {"player_sponsor_progress_bar", {}, {}, 1}},
     {SettingItem::PLAYER_SPONSOR_PRESET, {"player_sponsor_preset", {}, {}, 1}},
+    {SettingItem::PLAYER_SPONSOR_USER_ID, {"player_sponsor_user_id", {}, {}, 1}},
     {SettingItem::NETWORK_BLOCK_PCDN, {"network_block_pcdn", {}, {}, 1}},
     {SettingItem::NETWORK_CDN_PREFER, {"network_cdn_prefer", {}, {}, 1}},
     {SettingItem::PLAYER_LOW_QUALITY, {"player_low_quality", {}, {}, 1}},

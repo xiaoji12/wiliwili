@@ -505,6 +505,29 @@
       "added": "已加入稍後再看",
       "removed": "已移出稍後再看",
       "failed": "稍後再看操作失敗，請重試"
+    },
+    "sponsor_submit": {
+      "button": "提交片段",
+      "title": "提交空降助手片段",
+      "start": "起點",
+      "end": "終點",
+      "category": "分類",
+      "now": "目前進度",
+      "hint": "點「起點」「終點」即把該項設為目前播放進度。影片會繼續播放，所以可以先標起點，等片段播完再標終點。提交成功後進度條上會立即出現該分段。",
+      "submit": "提交",
+      "ok": "片段已提交，感謝貢獻",
+      "failed": "提交失敗，請稍後重試",
+      "network_failed": "網路異常，提交失敗",
+      "invalid_range": "請先標記起點與終點，且終點要晚於起點",
+      "cat_sponsor": "贊助 / 業配",
+      "cat_selfpromo": "自我推廣",
+      "cat_interaction": "互動提醒（三連等）",
+      "cat_intro": "開場",
+      "cat_outro": "結尾",
+      "cat_preview": "預告",
+      "cat_filler": "離題內容",
+      "cat_music_offtopic": "非音樂部分",
+      "cat_poi_highlight": "精彩片段"
     }
   },
   "dialog": {

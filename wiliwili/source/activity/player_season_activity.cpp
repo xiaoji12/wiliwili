@@ -129,6 +129,11 @@ void PlayerSeasonActivity::onContentAvailable() {
         return true;
     });
 
+    // 番剧页不接入「稍后再看」与「提交空降助手片段」：
+    // 这两个按钮只有 PlayerActivity 才会绑定点击逻辑，留着就是两个按了没反应的死按钮。
+    if (this->btnLater) this->btnLater->getParent()->setVisibility(brls::Visibility::GONE);
+    if (this->btnSponsor) this->btnSponsor->getParent()->setVisibility(brls::Visibility::GONE);
+
     // 点赞按钮
     this->btnAgree->getParent()->registerClickAction([this](...) {
         if (!DialogHelper::checkLogin()) return true;

@@ -22,9 +22,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag to attach the APK to, e.g. v1.6.2-cn'
+        description: 'Release tag to attach the APK to, e.g. v1.6.3-cn'
         required: false
-        default: 'v1.6.2-cn'
+        default: 'v1.6.3-cn'
       upload_release:
         description: 'Upload the APK to the GitHub Release'
         required: false
@@ -47,7 +47,7 @@ jobs:
           INPUT_TAG: ${{ github.event.inputs.tag }}
         run: |
           set -euo pipefail
-          TAG="${INPUT_TAG:-v1.6.2-cn}"
+          TAG="${INPUT_TAG:-v1.6.3-cn}"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           # One universal APK carrying armeabi-v7a + arm64-v8a + x86_64,
           # so the name only needs the tag.
