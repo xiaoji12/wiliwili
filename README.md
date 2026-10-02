@@ -1,14 +1,3 @@
-> ## ⚠️ 这是 AI 生成的二次开发分支
->
-> 本仓库是 [wiliwili](https://github.com/xfangfang/wiliwili) 的 fork，
-> **所有新增与修改的代码 100% 由 AI（WorkBuddy AI）生成**，人工仅提出需求与验收，未手写任何代码。
->
-> **新增功能**：SponsorBlock 空降助手（官方同款配色）· 进度条分段着色 · B 站 CDN 优化（彻底屏蔽 PCDN）· 稍后再看一键加入/移除 · **Android 版（手柄 / 遥控器可用）**
->
-> 完整引用清单与 AI 声明见 **[CREDITS.md](CREDITS.md)**。
-
-- - -
-
 <p align="center">
     <img src="resources/svg/cn.xfangfang.wiliwili.svg" alt="logo" height="128" width="128"/>
 </p>
@@ -18,33 +7,18 @@
 <p align="center">
 <b><a href="#特点">特点</a></b>
 |
-<b><a href="#安装">安装</a></b>
+<b><a href="#本分支新增功能">本分支新增功能</a></b>
 |
-<b><a href="#文档">文档</a></b>
+<b><a href="#安装">安装</a></b>
 |
 <b><a href="#开发">开发</a></b>
 </p>
 
 - - -
 
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/xfangfang/wiliwili)](https://github.com/xfangfang/wiliwili/releases)
-![GitHub All Releases](https://img.shields.io/github/downloads/xfangfang/wiliwili/total)
-![GitHub stars](https://img.shields.io/github/stars/xfangfang/wiliwili?style=flat)
-![GitHub forks](https://img.shields.io/github/forks/xfangfang/wiliwili)
-[![Crowdin](https://badges.crowdin.net/wiliwili/localized.svg)](https://crowdin.com/project/wiliwili)
-![NS](https://img.shields.io/badge/-Nintendo%20Switch-e4000f?style=flat&logo=Nintendo%20Switch)
-![PSV](https://img.shields.io/badge/-PSVita-003791?style=flat&logo=PlayStation)
-![PS4](https://img.shields.io/badge/-PS4-003791?style=flat&logo=PlayStation)
 ![MS](https://img.shields.io/badge/-Windows%207+-357ec7?style=flat&logo=Windows)
-![mac](https://img.shields.io/badge/-macOS%2010.11+-black?style=flat&logo=Apple)
 ![Linux](https://img.shields.io/badge/-Linux-lightgrey?style=flat&logo=Linux&logoColor=white)
 ![Android](https://img.shields.io/badge/-Android%208.0+-3DDC84?style=flat&logo=Android&logoColor=white)
-[![fedora](https://img.shields.io/badge/fedora-copr-blue?logo=fedora)](https://copr.fedorainfracloud.org/coprs/mochaa/wiliwili/)
-[![Scoop Version (extras bucket)](https://img.shields.io/scoop/v/wiliwili?bucket=extras)](https://scoop.sh/#/apps?q=wiliwili)
-[![aur](https://img.shields.io/aur/version/wiliwili?color=blue&logo=archlinux)](https://aur.archlinux.org/packages/wiliwili/)
-[![Flathub](https://img.shields.io/flathub/v/cn.xfangfang.wiliwili)](https://flathub.org/apps/cn.xfangfang.wiliwili)
-[![nightly.link](https://img.shields.io/badge/nightly.link-%E6%B5%8B%E8%AF%95%E7%89%88-green)](https://nightly.link/xfangfang/wiliwili/workflows/build.yaml/dev)
-[![layout](https://img.shields.io/badge/wiliwili-自定义布局-yellow)](https://github.com/xfangfang/wiliwili_theme)
 
 <br>
 
@@ -65,60 +39,49 @@ wiliwili 拥有非常接近官方PC客户端的B站浏览体验
 
 <br>
 
-# 安装
+# 本分支新增功能
 
-### Nintendo Switch
+- **SponsorBlock 空降助手**：播放时自动跳过社区标注的赞助 / 片头 / 片尾等片段，分类配色与官方 SponsorBlock 一致
+- **进度条分段着色**：进度条上按分类标出各标注片段
+- **B 站 CDN 优化**：支持按运营商优选 CDN，并彻底屏蔽 PCDN / MCDN 节点
+- **稍后再看**：播放页一键加入 / 移除
+- **Android 版**：手柄与 Android TV 遥控器可用
 
-1. 下载 `wiliwili-NintendoSwitch.zip`：[wiliwili releases](https://github.com/xfangfang/wiliwili/releases)
-2. 将 wiliwili.nro 放置在**内存卡** `switch` 目录下。
-3. 在主页 `按住` R键打开任意游戏进入 hbmenu，在列表中选择 wiliwili 点击打开即可。
-4. [可选] 在应用内安装桌面图标，入口：设置/实用工具/使用教程
-
-<details>
+引用清单与已知局限见 **[CREDITS.md](CREDITS.md)**。
 
 <br>
 
-桌面图标会优先尝试打开 `switch/wiliwili.nro`，如果其不存在，则尝试打开 `switch/wiliwili/wiliwili.nro`，如果这两个路径都不存在，则打开
-hbmenu 自行选择路径。
+# 安装
 
-默认提供的为 OpenGL 版本，最高只能播放 4k@30，你也可以下载到支持原生图形 api
-的 [deko3d 版本](https://nightly.link/xfangfang/wiliwili/workflows/build.yaml/dev)，可以流畅播放 4k@60，不过可能会偶尔崩溃。
+下载地址：[本仓库 Releases](https://github.com/xiaoji12/wiliwili/releases)
 
-</details>
+| 平台 | 文件 | 说明 |
+| --- | --- | --- |
+| Windows x86_64 | `wiliwili-Windows-*-portable.zip` | 绿色便携版，解压即用，已内置全部运行库（含 libmpv） |
+| Linux / Steam Deck x86_64 | `wiliwili-Linux-*-x86_64.flatpak` | Flatpak 包，Steam Deck 桌面模式可直接安装 |
+| Android 8.0+ | `wiliwili-Android-*.apk` | 通用 APK，含 arm64-v8a / armeabi-v7a / x86_64 |
 
-### PSVita
+### Windows
 
-下载 `wiliwili-PSVita.vpk` 安装即可：[wiliwili releases](https://github.com/xfangfang/wiliwili/releases)
+解压后双击 `wiliwili.exe` 即可，无需安装任何运行库。
 
-开启硬解后可以流畅播放 720P 横屏视频，480P 竖屏视频，部分直播 1080P 原画。
+### Linux / Steam Deck
 
-### PS4
+```bash
+# 方式一：命令行
+flatpak install --user ./wiliwili-Linux-*-x86_64.flatpak
 
-下载 `wiliwili-PS4.pkg` 安装即可：[wiliwili releases](https://github.com/xfangfang/wiliwili/releases)
+# 方式二：桌面模式双击 .flatpak 文件，由 Discover / GNOME Software 安装
+```
 
-只支持软解，如果想播放 4k@60 需要在设置中开启低画质解码。
-
-### PC
-
-PC客户端支持切换硬件解码、秒开流畅适合老电脑、支持鼠标操控（左键点击 右键返回 中键刷新）
-
-下载对应系统的安装包运行即可：[wiliwili releases](https://github.com/xfangfang/wiliwili/releases)
-
-> [!TIP]
-> 现在 Linux & Steam Deck 用户可以通过系统自带的软件商店（如Discover、GNOME Software）搜索 `wiliwili` 进行下载。  
-> 更多使用技巧请参考 [项目 WIKI](https://github.com/xfangfang/wiliwili/wiki)  
+装好后可直接在桌面模式启动；若想在游戏模式使用，可在 Steam 中「添加非 Steam 游戏」指向 `flatpak run cn.xfangfang.wiliwili`。
 
 ### Android
 
-> [!NOTE]
-> 这是**本 fork 新增**的平台，上游 wiliwili 不支持 Android（见下文「软件移植」中的说明）。
-
-下载 `wiliwili-Android-*.apk` 安装即可。一个通用 APK 同时包含
-`arm64-v8a` / `armeabi-v7a` / `x86_64` 三个 ABI，最低 Android 8.0（API 26）。
+一个通用 APK 同时包含 `arm64-v8a` / `armeabi-v7a` / `x86_64` 三个 ABI，最低 Android 8.0（API 26）。
 
 - **手柄**：有线（USB）/ 蓝牙手柄即插即用，方向键、ABXY、肩键、摇杆、扳机、震动全部可用
-- **Android TV 遥控器**：方向键、OK、返回、菜单键可用；播放/暂停、快进、快退
-  已映射到 wiliwili 的默认快捷键
+- **Android TV 遥控器**：方向键、OK、返回、菜单键可用；播放/暂停、快进、快退已映射到 wiliwili 的默认快捷键
 - **Android TV**：声明了 `LEANBACK_LAUNCHER` 与 TV 横幅，会出现在电视首页
 - 手机 / 平板同样可以安装，触屏与手柄可混用
 
@@ -127,139 +90,23 @@ PC客户端支持切换硬件解码、秒开流畅适合老电脑、支持鼠标
 
 <br>
 
-# 文档
-
-在各位开发者的帮助下，wiliwili 支持了一系列包管理器，同时 wiliwili 还拥有丰富的自定义选项，包括：使用 Anime4K
-提升观感，自定义字体及图标等等  
-前往 [项目 WIKI](https://github.com/xfangfang/wiliwili/wiki) 查看更多使用技巧
-
-<br>
-
-# TODO list
-
-如果你有其他改进的想法或创意，欢迎在讨论区交流：[Discussions](https://github.com/xfangfang/wiliwili/discussions/categories/ideas)
-
-<details>
-
-- [x] 初步完成底层基础组件、首页各类推荐视频、用户视频播放页
-- [x] 微调页面、解决播放器启动速度慢、解决播放页面退出卡顿
-- [x] 临时解决异步加载导致的空指针问题（图片异步加载某些情况还会出现问题，待修复）
-- [x] 添加番剧/影视播放、添加扫码登录、播放历史、用户收藏夹（收藏夹相关部分工作不稳定）
-- [x] 初步添加搜索
-- [x] 播放页新增分集与UP主最新投稿
-- [x] 完善视频播放页用户评论内容
-- [x] 重构图片异步加载逻辑
-- [x] 解决收藏夹、搜索页某些情况导致闪退的问题
-- [x] 完善搜索页：番剧、影视 转为竖图
-- [x] 完善播放页投稿列表：调整结构、自动加载下一页
-- [x] 播放页展示合集与推荐
-- [x] 添加动态页
-- [x] 添加视频检索页
-- [x] 完善设置页
-- [x] 弹幕相关设置
-- [x] 点赞、投币、收藏
-- [x] 拖拽调节进度
-- [x] 增加单手模式使用一个手柄来控制播放器
-- [x] NSP forwarder自动检查多个位置的nro文件，避免无法打开
-- [x] 增加设置使首页无法通过返回退出，避免误触
-- [x] 使用教程添加未指明的快捷键说明
-- [x] 重压摇杆临时快进
-- [x] 支持切换按键图标
-- [x] 应用内多语言切换
-- [x] 重构搜索页面
-- [x] 评论@显示不同颜色
-- [x] 完善评论图片
-- [x] 评论大表情包所在行增加行高
-- [x] 支持webp图片
-- [ ] 搜索支持搜索用户
-- [ ] 长按一键三连
-- [ ] 支持个人主页
-- [ ] 评论跳转进度
-- [ ] 评论跳转搜索
-- [ ] 评论下方的更多信息 (up主点赞等内容)
-- [ ] 投票评论
-- [ ] 互动视频
-
-</details>
-
-<br>
-
-# 反馈问题前要做的事
-
-1. 网络相关的问题附加 `网络诊断截图`，入口：应用内设置/实用工具/网络诊断
-2. [Switch用户] 要确保 `大气层`和`系统固件` 更新到 **最新** ，`内存卡`为 **FAT32**
-3. [Switch用户] 如果打开应用黑屏时间过长，可以尝试删除内存卡目录 `config/wiliwili` 重新进入
-4. 确保 `系统时间`正确、系统`网络设置`正确（主要是DNS）、如果使用了`网络代理`请在反馈前关闭并重新测试
-5. 查找有没有其他人出现过类似的问题：[Issues](https://github.com/xfangfang/wiliwili/issues?q=is%3Aissue)
-6. **完整且详细地** 描述你的问题，最好附加演示视频、截图。
-7. 尝试复现问题，尽力找到BUG出现的规律
-
-<br>
-
-# 贡献
-
-### 软件移植
-
-本应用基于 nanovg 绘制界面，nanovg 底层可移植切换到任意图形库，已有 OpenGL/Vulkan/Metal 等支持。   
-视频播放部分则使用 FFMPEG + MPV 绘制，默认使用 OpenGL，有 D3D11/Deko3d/Gxm 或软件渲染支持。  
-触摸/按键/输入法等平台相关功能通过 GLFW 或 SDL 来支持，也可以脱离二者直接实现，比如 Gxm 版 PSV。
-
-如果你要移植的设备支持 OpenGL(ES) 那么一般来说，直接编译就能正常运行。  
-如果你要移植的设备使用其他底层图形库，那么首先需要移植 nanovg，这可以确保应用主要界面正常，
-其次为了更好的性能表现需要 ffmpeg 的硬解和 mpv 的渲染支持。  
-
-如果你有想要移植的设备欢迎发一条 issue 讨论。
-
-> 上游原文写的是「Android / iOS 不在讨论之内」。那只是上游的维护取舍，**不是技术上做不到**：
-> borealis 本身带完整的 Android 后端（`PLATFORM_ANDROID` + SDL2 + GLES + libromfs），
-> wiliwili 主体源码一行都不用改，本 fork 就是靠这套后端加一个 `android-project/` 工程跑起来的。
-> 具体见 [android-project/README.md](android-project/README.md)。
-
-### 新功能
-
-如果你有想完成的创意，请在开发前发布一个 issue 讨论，避免和别人的创意撞车浪费了时间
-
-### 多语言支持
-
-如果你想为软件添加多语言的翻译支持，或者发现了某些翻译存在问题需要订正，请查看 [#52](https://github.com/xfangfang/wiliwili/issues/52)
-了解如何贡献翻译
-
-### 代码分支
-
-主分支 yoga 为最新版本的代码  
-开发分支 dev 为正在开发中的代码，任何新的 PR 都需要向 dev 分支提交
-
-<br>
-
 # 开发
 
 ```shell
-# 拉取代码
-git clone --recursive https://github.com/xfangfang/wiliwili.git
+# 拉取代码（含子模块）
+git clone --recursive https://github.com/xiaoji12/wiliwili.git
 cd wiliwili
 ```
 
-### PC本地运行
+### PC 本地运行
 
-目前 wiliwili 支持运行在 Linux macOS 和 Windows上
+目前本分支在 Linux 与 Windows 上验证通过。
 
 <details>
-
-#### macOS
-
-```shell
-# macOS: install dependencies
-brew install mpv webp
-
-cmake -B build -DPLATFORM_DESKTOP=ON
-make -C build wiliwili -j$(sysctl -n hw.ncpu)
-```
 
 #### Linux
 
 不同 Linux 的编译过程或依赖可能不同，这里是一份总结：[#89](https://github.com/xfangfang/wiliwili/discussions/89)
-
-欢迎在上面的链接中写出你所使用系统的编译过程供大家参考。
 
 ```shell
 # Ubuntu: install dependencies
@@ -290,105 +137,13 @@ cmake -B build -G "MinGW Makefiles" -DPLATFORM_DESKTOP=ON
 mingw32-make -C build wiliwili -j$(nproc)
 ```
 
-
 </details>
 
-### 交叉编译 Switch 可执行文件 (wiliwili.nro)
+### Android
 
-推荐使用docker构建，本地构建配置环境略微繁琐不过可用来切换底层的ffmpeg或mpv等其他依赖库更灵活地进行调试。
-
-<details>
-
-以下介绍 OpenGL 下的构建方法，deko3d (更好的硬解支持)请参考：`scripts/build_switch_deko3d.sh`
-
-#### Docker
-
-```shell
-docker run --rm -v $(pwd):/data devkitpro/devkita64:20251117 \
-  bash -c "/data/scripts/build_switch.sh"
-```
-
-#### 本地编译
-
-```shell
-# 1. 安装devkitpro环境: https://github.com/devkitPro/pacman/releases
-
-# 2. 安装依赖
-sudo dkp-pacman -S switch-glfw switch-libwebp switch-cmake switch-curl devkitA64
-
-# 3. 安装自定义依赖
-# devkitpro提供的提供的 ffmpeg/mpv 无法播放网络视频
-# 手动编译方法请参考：scripts/README.md
-base_url="https://github.com/xfangfang/wiliwili/releases/download/v0.1.0"
-sudo dkp-pacman -U \
-    $base_url/switch-ffmpeg-7.1-1-any.pkg.tar.zst \
-    $base_url/switch-libmpv-0.36.0-3-any.pkg.tar.zst
-
-# 4. build
-cmake -B cmake-build-switch -DPLATFORM_SWITCH=ON
-make -C cmake-build-switch wiliwili.nro -j$(nproc)
-```
-
-</details>
-
-### 交叉编译 PSV 可执行文件
-
-使用本地环境来编译可以参考：
- - [borealis 编译指南](https://github.com/xfangfang/borealis/wiki/PS-Vita)
- - [wiliwili vita 编译指南](https://gist.github.com/xfangfang/305da139721ad4e96d7a9d9a1a550a9d)
-
-注意: 我们使用自定义的 mbedtls, curl 和 ffmpeg 作为依赖, 在使用本地环境编译时，请先卸载 vitasdk 中的相关库，再安装[指定的](https://github.com/xfangfang/wiliwili/tree/yoga/scripts/psv)依赖.
-
-<details>
-
-```shell
-# 构建 OpenGL ES 2.0 版
-docker run --rm -v $(pwd):/src/ xfangfang/wiliwili_psv_builder:latest \
-    "cmake -B cmake-build-psv -G Ninja -DPLATFORM_PSV=ON \
-        -DMPV_NO_FB=ON -DUSE_SYSTEM_CURL=ON -DUSE_SYSTEM_SDL2=ON \
-        -DCMAKE_BUILD_TYPE=Release && \
-        cmake --build cmake-build-psv"
-
-# 构建 Gxm 版 (推荐)
-docker run --rm -v $(pwd):/src/ xfangfang/wiliwili_psv_builder:latest-gxm \
-    "cmake -B cmake-build-psv -G Ninja -DPLATFORM_PSV=ON \
-        -DUSE_SYSTEM_CURL=ON -DUSE_GXM=ON -DUSE_VITA_SHARK=OFF \
-        -DCMAKE_BUILD_TYPE=Release && \
-        cmake --build cmake-build-psv"
-```
-
-</details>
-
-### 交叉编译 PS4 可执行文件
-
-使用本地环境来编译可以参考: 
- - [PacBrew 环境安装](https://github.com/PacBrew/pacbrew-packages)
- - [borealis 编译指南](https://github.com/xfangfang/borealis/wiki/PS4)
- - [编译 wiliwili 依赖的第三方库](https://github.com/xfangfang/wiliwili/blob/dev/scripts/ps4/Dockerfile)
-
-<details>
-
-```shell
-docker run --rm -v $(pwd):/src/ xfangfang/wiliwili_ps4_builder:latest \
-    "cmake -B cmake-build-ps4 -DPLATFORM_PS4=ON \
-        -DMPV_NO_FB=ON \
-        -DUSE_SYSTEM_CPR=ON && \
-        make -C cmake-build-ps4 -j$(nproc)"
-```
-
-</details>
-
-### GLFW or SDL
-
-wiliwili 使用 nanovg 绘制图形和文字，对于创建窗口、按键触摸、输入法等支持是通过 GLFW(默认) 或 SDL 完成的。
-
-因为 GLFW 支持平台有限，在移植到新平台时可以使用 SDL 或者自行实现上述对应接口。
-
-```shell
-# 示例
-cmake -B build -DPLATFORM_DESKTOP=ON -DUSE_SDL2=ON
-cmake --build build
-```
+Android 版由 `.github/workflows/android.yml` 在 GitHub Actions 上构建，
+本地构建需要 Android SDK + **NDK r26.1.10909125** + CMake 3.22.1。
+完整步骤与踩坑说明见 **[android-project/README.md](android-project/README.md)**。
 
 <br>
 
@@ -403,12 +158,6 @@ cmake --build build
 
 The development of wiliwili cannot do without the support of the following organization and open source projects.
 
-- Toolchain: devkitpro, switchbrew, vitasdk OpenOrbis and PacBrew
-    - https://github.com/devkitPro
-    - https://github.com/switchbrew/libnx
-    - https://github.com/vitasdk
-    - https://github.com/OpenOrbis
-    - https://github.com/PacBrew
 - UI Library: natinusala and XITRIX
     - https://github.com/natinusala/borealis
     - https://github.com/XITRIX/borealis
@@ -429,6 +178,8 @@ The development of wiliwili cannot do without the support of the following organ
     - https://github.com/cesanta/mongoose
     - https://chromium.googlesource.com/webm/libwebp
     - https://github.com/fancycode/MemoryModule
+
+> 完整的第三方致谢清单（各平台工具链、播放器内核贡献者等）见 [上游项目 README](https://github.com/xfangfang/wiliwili#acknowledgement)。
 
 # Special thanks
 
