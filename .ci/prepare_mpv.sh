@@ -31,12 +31,21 @@ for abi in $ABIS; do
     for so in "$TMP/aar/jni/$abi/"*.so; do
         name="$(basename "$so")"
         case "$name" in
-            # libc++_shared.so comes from our own NDK build,
-            # libplayer.so is the AAR's Java wrapper, not used by wiliwili
-            libc++_shared.so|libplayer.so) continue ;;
+            # libplayer.so is the AAR's Java wrapper, wiliwili drives libmpv
+            # directly through the C API, so we do not need it.
+            libplayer.so) continue ;;
         esac
         cp "$so" "$JNILIBS/$abi/"
     done
+
+    # libc++_shared.so MUST come from this AAR, not from the NDK:
+    #   1. libmpv.so imports std::__ndk1::__from_chars_floating_point<float|double>,
+    #      which only the newer libc++ shipped here exports. The NDK r26
+    #      libc++ does not, so libmpv.so cannot resolve its symbols without it.
+    #   2. This copy has 16 KB aligned LOAD segments (p_align 0x4000); the NDK r26
+    #      one is 0x1000, which the Android 15+ 16 KB page kernels reject.
+    # .ci/align_libcxx.sh installs it over the NDK's sysroot copy so that AGP,
+    # which packages the STL from there, picks this one up.
     echo "Prepared $abi: $(ls "$JNILIBS/$abi" | tr '\n' ' ')"
 done
 

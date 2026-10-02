@@ -117,6 +117,14 @@ jobs:
       - name: Prepare prebuilt libmpv
         run: bash .ci/prepare_mpv.sh
 
+      # AGP packages libc++_shared.so out of the NDK sysroot, and the NDK r26
+      # copy is wrong for us in two ways: it does not export
+      # std::__ndk1::__from_chars_floating_point<float|double> (which the
+      # prebuilt libmpv.so imports), and its LOAD segments are only 4 KB aligned.
+      # The copy that ships with the libmpv AAR has both, so install it there.
+      - name: Install AAR libc++_shared.so over the NDK copy
+        run: bash .ci/align_libcxx.sh
+
       - name: Create signing keystore
         run: |
           set -euxo pipefail
@@ -152,16 +160,58 @@ jobs:
             echo "OK ${abi}"
           done
 
-          echo "--- libromfs resources bundled into libwiliwili.so ---"
+          echo "--- libc++_shared.so must be the AAR copy ---"
           rm -rf /tmp/apkx && mkdir -p /tmp/apkx
-          unzip -q "${APK}" 'lib/arm64-v8a/*.so' -d /tmp/apkx
-          strings -a /tmp/apkx/lib/arm64-v8a/libwiliwili.so \
-            | grep -E 'resources/(xml|img|svg)/' | sort -u | head -10 || true
+          unzip -q -o "${APK}" 'lib/arm64-v8a/*.so' -d /tmp/apkx
+          echo "apk   sha256=$(sha256sum /tmp/apkx/lib/arm64-v8a/libc++_shared.so | cut -d' ' -f1)"
+          echo "aar   sha256=$(sha256sum android-project/app/libs/arm64-v8a/libc++_shared.so | cut -d' ' -f1)"
+          cmp /tmp/apkx/lib/arm64-v8a/libc++_shared.so \
+              android-project/app/libs/arm64-v8a/libc++_shared.so \
+            || { echo "MISMATCH: APK still carries the NDK libc++_shared.so"; exit 1; }
+
+          echo "--- libmpv.so imports resolve against the packaged libc++ ---"
+          # std::__ndk1::__from_chars_floating_point<float|double> is only in the
+          # newer libc++; if it is missing, libmpv.so cannot load.
+          for sym in __from_chars_floating_point; do
+            if nm -D --undefined-only /tmp/apkx/lib/arm64-v8a/libmpv.so | grep -q "$sym"; then
+              nm -D --defined-only /tmp/apkx/lib/arm64-v8a/libc++_shared.so | grep -q "$sym" \
+                || { echo "UNRESOLVED: libmpv.so needs $sym but libc++_shared.so lacks it"; exit 1; }
+              echo "OK $sym is exported by the packaged libc++_shared.so"
+            fi
+          done
+
+          echo "--- libromfs resources bundled into libwiliwili.so ---"
+          # libromfs stores paths relative to resources/, so they look like
+          # "xml/activity/..." and never carry a "resources/" prefix.
+          for probe in xml/activity/setting_activity.xml xml/activity/main.xml \
+                       i18n/zh-Hans/wiliwili.json i18n/en-US/wiliwili.json; do
+            if grep -qa "$probe" /tmp/apkx/lib/arm64-v8a/libwiliwili.so; then
+              echo "OK   $probe"
+            else
+              echo "MISS $probe"
+            fi
+          done
+          grep -c "RomFs_wiliwili_get_paths" /tmp/apkx/lib/arm64-v8a/libwiliwili.so \
+            | sed 's/^/RomFs_wiliwili_get_paths occurrences: /'
 
           echo "--- 16KB page alignment (Android 15+) ---"
           for so in /tmp/apkx/lib/arm64-v8a/*.so; do
             readelf -lW "$so" | awk -v f="$(basename "$so")" '/LOAD/ {print f, $NF}' || true
           done | sort -u
+
+          echo "--- every LOAD segment of every 64-bit .so must be 0x4000 ---"
+          for abi in arm64-v8a x86_64; do
+            rm -rf /tmp/apk64 && mkdir -p /tmp/apk64
+            unzip -q -o "${APK}" "lib/${abi}/*.so" -d /tmp/apk64
+            for so in /tmp/apk64/lib/${abi}/*.so; do
+              bad="$(readelf -lW "$so" | awk '/LOAD/ && $NF != "0x4000" {print $NF}' | sort -u)"
+              if [ -n "$bad" ]; then
+                echo "UNALIGNED ${abi}/$(basename "$so"): $bad"
+                exit 1
+              fi
+            done
+            echo "OK all ${abi} LOAD segments are 0x4000"
+          done
 
       - name: Rename APK
         run: |
