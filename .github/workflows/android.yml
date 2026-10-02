@@ -1,0 +1,197 @@
+name: Build Android APK (CN)
+
+# 独立的 Android 构建链路，与 release-cn.yml（Linux Flatpak）互不影响。
+#
+# 关键点：
+#   1. borealis 原生带 Android 后端（toolchain.cmake 的 PLATFORM_ANDROID 分支
+#      自动开 USE_SDL2 + USE_GLES + USE_LIBROMFS，program_target 产出 .so），
+#      wiliwili 自身源码无需为 Android 做任何改动。
+#   2. libromfs-generator 必须在 host 上先编译出来，NDK 构建时用它把
+#      resources/ 打包进 libwiliwili.so。
+#   3. libmpv 用 mpv-android 的预编译 .so（.ci/prepare_mpv.sh）。
+#   4. 用 `gh release upload` 而非第三方 action：action 在 glob 不匹配时会
+#      静默跳过，导致 job 成功但资产没上传。
+
+on:
+  # 改动本文件或 android-project/ 即自动重跑
+  push:
+    paths:
+      - '.github/workflows/android.yml'
+      - '.ci/prepare_mpv.sh'
+      - 'android-project/**'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to attach the APK to, e.g. v1.6.2-cn'
+        required: false
+        default: 'v1.6.2-cn'
+      upload_release:
+        description: 'Upload the APK to the GitHub Release'
+        required: false
+        default: 'true'
+
+permissions:
+  contents: write
+
+jobs:
+  version:
+    name: Resolve names
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.info.outputs.tag }}
+      apk_name: ${{ steps.info.outputs.apk_name }}
+    steps:
+      - name: Compute artifact names
+        id: info
+        env:
+          INPUT_TAG: ${{ github.event.inputs.tag }}
+        run: |
+          set -euo pipefail
+          TAG="${INPUT_TAG:-v1.6.2-cn}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          # One universal APK carrying armeabi-v7a + arm64-v8a + x86_64,
+          # so the name only needs the tag.
+          echo "apk_name=wiliwili-Android-${TAG}" >> "$GITHUB_OUTPUT"
+          echo "resolved tag=${TAG}"
+
+  build-apk:
+    name: Build APK (3 ABIs)
+    needs: [ version ]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      # SDL 2.28 still calls ALooper_pollAll(), which NDK r27 removed, so r26 is required.
+      # cmake;3.22.1 matches the version pinned in android-project/app/build.gradle.
+      - name: Install NDK, CMake and platform
+        run: |
+          set -euxo pipefail
+          sdkmanager --install "ndk;26.1.10909125" "cmake;3.22.1" "platforms;android-34" "build-tools;34.0.0"
+          echo "--- installed NDKs ---"
+          ls "${ANDROID_HOME}/ndk"
+
+      - name: Install host build tools
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y ninja-build pkg-config
+
+      # libromfs-generator is a host binary; the NDK build invokes it to turn
+      # resources/ into C++ that gets linked into libwiliwili.so.
+      - name: Build libromfs-generator (host tool)
+        run: |
+          set -euxo pipefail
+          cd library/borealis
+          bash build_libromfs_generator.sh
+          cp libromfs-generator ../../libromfs-generator
+          file ../../libromfs-generator
+          ls -l ../../libromfs-generator
+
+      - name: Prepare prebuilt libmpv
+        run: bash .ci/prepare_mpv.sh
+
+      - name: Create signing keystore
+        run: |
+          set -euxo pipefail
+          keytool -genkeypair -v \
+            -keystore android-project/app/wiliwili.jks -storetype JKS \
+            -storepass wiliwili -keypass wiliwili \
+            -alias wiliwili -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=wiliwili-android, OU=wiliwili, O=wiliwili, L=NA, S=NA, C=CN"
+
+      - name: Build release APK
+        working-directory: android-project
+        run: |
+          set -euxo pipefail
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon --stacktrace
+
+      - name: Verify APK
+        run: |
+          set -euxo pipefail
+          APK="$(ls android-project/app/build/outputs/apk/release/*.apk | head -1)"
+          echo "APK: ${APK}"
+          ls -lh "${APK}"
+
+          echo "--- native libraries packaged ---"
+          unzip -l "${APK}" | grep -E 'lib/[^/]+/[^/]+\.so' || true
+
+          echo "--- required libs per ABI ---"
+          for abi in armeabi-v7a arm64-v8a x86_64; do
+            for lib in libSDL2.so libmpv.so libwiliwili.so libc++_shared.so; do
+              unzip -l "${APK}" | grep -q "lib/${abi}/${lib}" \
+                || { echo "MISSING lib/${abi}/${lib}"; exit 1; }
+            done
+            echo "OK ${abi}"
+          done
+
+          echo "--- libromfs resources bundled into libwiliwili.so ---"
+          rm -rf /tmp/apkx && mkdir -p /tmp/apkx
+          unzip -q "${APK}" 'lib/arm64-v8a/*.so' -d /tmp/apkx
+          strings -a /tmp/apkx/lib/arm64-v8a/libwiliwili.so \
+            | grep -E 'resources/(xml|img|svg)/' | sort -u | head -10 || true
+
+          echo "--- 16KB page alignment (Android 15+) ---"
+          for so in /tmp/apkx/lib/arm64-v8a/*.so; do
+            readelf -lW "$so" | awk -v f="$(basename "$so")" '/LOAD/ {print f, $NF}' || true
+          done | sort -u
+
+      - name: Rename APK
+        run: |
+          set -euxo pipefail
+          mkdir -p dist
+          cp android-project/app/build/outputs/apk/release/*.apk \
+             "dist/${{ needs.version.outputs.apk_name }}.apk"
+          ls -lh dist
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: android-apk
+          path: dist/*.apk
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    name: Publish Release
+    needs: [ version, build-apk ]
+    if: github.event.inputs.upload_release != 'false' && !cancelled()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download APK artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: android-apk
+          path: dist
+
+      - name: Inspect downloaded files
+        run: ls -lhR dist
+
+      - name: Attach APK to Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 本 job 没有 checkout，工作目录不是 git 仓库；
+          # 不显式指定仓库时 gh 会报 "fatal: not a git repository" 而直接失败。
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ needs.version.outputs.tag }}
+        run: |
+          set -euxo pipefail
+          gh release view "$TAG" --repo "$GH_REPO" >/dev/null 2>&1 \
+            || gh release create "$TAG" --repo "$GH_REPO" --title "wiliwili $TAG" --notes "Built by GitHub Actions."
+          gh release upload "$TAG" dist/*.apk --repo "$GH_REPO" --clobber
+          echo "--- assets on release $TAG ---"
+          gh release view "$TAG" --repo "$GH_REPO" --json assets --jq '.assets[] | "\(.name)  \(.size) bytes"'

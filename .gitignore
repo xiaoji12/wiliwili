@@ -21,7 +21,6 @@ repo/
 /winrt/AppxManifest.xml
 libromfs-generator
 build-*
-android-project
 *.deb
 *.dmp
 # Github Copilot

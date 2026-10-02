@@ -1,0 +1,86 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace = "cn.xfangfang.wiliwili"
+    compileSdkVersion 34
+
+    defaultConfig {
+        applicationId "cn.xfangfang.wiliwili"
+        minSdkVersion 26
+        targetSdkVersion 34
+        versionCode 10602
+        versionName "1.6.2"
+        // r26 builds fine (SDL 2.28 uses ALooper_pollAll which r27 rejects);
+        // 16KB page alignment is forced via -Wl,-z,max-page-size=16384
+        ndkVersion "26.1.10909125"
+        externalNativeBuild {
+            cmake {
+                // CPR_FORCE_MBEDTLS_BACKEND skips cpr's SSL backend auto-detection:
+                // the NDK ships no OpenSSL, and forcing the backend keeps the
+                // find_package(OpenSSL) probe from deciding differently on another
+                // runner. jni/CMakeLists.txt wires mbedtls into cpr/curl.
+                arguments "-DANDROID_PLATFORM=android-26",
+                          "-DANDROID_STL=c++_shared",
+                          "-DCMAKE_WARN_DEPRECATED=FALSE",
+                          "-DBRLS_UNITY_BUILD=ON",
+                          "-DUSE_GLES3=ON",
+                          "-DDISABLE_WEBP=ON",
+                          "-DCPR_FORCE_MBEDTLS_BACKEND=ON",
+                          "-DAPP_PLATFORM_LIB=-lmpv"
+                abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86_64'
+            }
+        }
+    }
+
+    signingConfigs {
+        release {
+            // Generated in CI (see .github/workflows/android.yml), password is public on purpose
+            storeFile file("wiliwili.jks")
+            storePassword 'wiliwili'
+            keyAlias 'wiliwili'
+            keyPassword 'wiliwili'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    // SDL opens native libraries by path under nativeLibraryDir,
+    // so they must be extracted from the APK
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+
+    applicationVariants.all { variant ->
+        tasks["merge${variant.name.capitalize()}Assets"]
+            .dependsOn("externalNativeBuild${variant.name.capitalize()}")
+    }
+
+    if (!project.hasProperty('EXCLUDE_NATIVE_LIBS')) {
+        sourceSets.main {
+            jniLibs.srcDir 'libs'
+        }
+        externalNativeBuild {
+            cmake {
+                path 'jni/CMakeLists.txt'
+                version = '3.22.1'
+            }
+        }
+    }
+
+    lint {
+        abortOnError = false
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+}

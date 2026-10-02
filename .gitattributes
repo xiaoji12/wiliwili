@@ -1,0 +1,17 @@
+# Git for Windows defaults to core.autocrlf=true, which would hand CRLF to the
+# Linux runners and break the shell scripts that get executed there
+# ("./gradlew", ".ci/prepare_mpv.sh"). Pin the line endings explicitly.
+
+# Shell scripts executed on Linux CI
+/android-project/gradlew text eol=lf
+/.ci/*.sh          text eol=lf
+/.github/workflows/*.yml text eol=lf
+
+# Windows batch files must stay CRLF for cmd.exe
+/android-project/gradlew.bat text eol=crlf
+
+# Binary assets
+*.png binary
+*.jar binary
+*.ico binary
+*.jpg binary
