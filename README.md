@@ -3,7 +3,7 @@
 > 本仓库是 [wiliwili](https://github.com/xfangfang/wiliwili) 的 fork，
 > **所有新增与修改的代码 100% 由 AI（WorkBuddy AI）生成**，人工仅提出需求与验收，未手写任何代码。
 >
-> **新增功能**：SponsorBlock 空降助手（官方同款配色）· 进度条分段着色 · B 站 CDN 优化（彻底屏蔽 PCDN）· 稍后再看一键加入/移除
+> **新增功能**：SponsorBlock 空降助手（官方同款配色）· 进度条分段着色 · B 站 CDN 优化（彻底屏蔽 PCDN）· 稍后再看一键加入/移除 · **Android 版（手柄 / 遥控器可用）**
 >
 > 完整引用清单与 AI 声明见 **[CREDITS.md](CREDITS.md)**。
 
@@ -38,6 +38,7 @@
 ![MS](https://img.shields.io/badge/-Windows%207+-357ec7?style=flat&logo=Windows)
 ![mac](https://img.shields.io/badge/-macOS%2010.11+-black?style=flat&logo=Apple)
 ![Linux](https://img.shields.io/badge/-Linux-lightgrey?style=flat&logo=Linux&logoColor=white)
+![Android](https://img.shields.io/badge/-Android%208.0+-3DDC84?style=flat&logo=Android&logoColor=white)
 [![fedora](https://img.shields.io/badge/fedora-copr-blue?logo=fedora)](https://copr.fedorainfracloud.org/coprs/mochaa/wiliwili/)
 [![Scoop Version (extras bucket)](https://img.shields.io/scoop/v/wiliwili?bucket=extras)](https://scoop.sh/#/apps?q=wiliwili)
 [![aur](https://img.shields.io/aur/version/wiliwili?color=blue&logo=archlinux)](https://aur.archlinux.org/packages/wiliwili/)
@@ -106,6 +107,23 @@ PC客户端支持切换硬件解码、秒开流畅适合老电脑、支持鼠标
 > [!TIP]
 > 现在 Linux & Steam Deck 用户可以通过系统自带的软件商店（如Discover、GNOME Software）搜索 `wiliwili` 进行下载。  
 > 更多使用技巧请参考 [项目 WIKI](https://github.com/xfangfang/wiliwili/wiki)  
+
+### Android
+
+> [!NOTE]
+> 这是**本 fork 新增**的平台，上游 wiliwili 不支持 Android（见下文「软件移植」中的说明）。
+
+下载 `wiliwili-Android-*.apk` 安装即可。一个通用 APK 同时包含
+`arm64-v8a` / `armeabi-v7a` / `x86_64` 三个 ABI，最低 Android 8.0（API 26）。
+
+- **手柄**：有线（USB）/ 蓝牙手柄即插即用，方向键、ABXY、肩键、摇杆、扳机、震动全部可用
+- **Android TV 遥控器**：方向键、OK、返回、菜单键可用；播放/暂停、快进、快退
+  已映射到 wiliwili 的默认快捷键
+- **Android TV**：声明了 `LEANBACK_LAUNCHER` 与 TV 横幅，会出现在电视首页
+- 手机 / 平板同样可以安装，触屏与手柄可混用
+
+详细说明（按键映射表、构建方法、为什么锁 NDK r26、16 KB 页对齐等）
+见 **[android-project/README.md](android-project/README.md)**。
 
 <br>
 
@@ -190,7 +208,12 @@ PC客户端支持切换硬件解码、秒开流畅适合老电脑、支持鼠标
 如果你要移植的设备使用其他底层图形库，那么首先需要移植 nanovg，这可以确保应用主要界面正常，
 其次为了更好的性能表现需要 ffmpeg 的硬解和 mpv 的渲染支持。  
 
-如果你有想要移植的设备欢迎发一条 issue 讨论，Android / iOS 不在讨论之内。
+如果你有想要移植的设备欢迎发一条 issue 讨论。
+
+> 上游原文写的是「Android / iOS 不在讨论之内」。那只是上游的维护取舍，**不是技术上做不到**：
+> borealis 本身带完整的 Android 后端（`PLATFORM_ANDROID` + SDL2 + GLES + libromfs），
+> wiliwili 主体源码一行都不用改，本 fork 就是靠这套后端加一个 `android-project/` 工程跑起来的。
+> 具体见 [android-project/README.md](android-project/README.md)。
 
 ### 新功能
 
