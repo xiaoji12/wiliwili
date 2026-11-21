@@ -197,6 +197,8 @@ std::unordered_map<SettingItem, ProgramOption> ProgramConfig::SETTING_MAP = {
     {SettingItem::PLAYER_SPONSOR_CATEGORIES, {"player_sponsor_categories", {}, {}, 1}},
     {SettingItem::PLAYER_SPONSOR_PROGRESS_BAR, {"player_sponsor_progress_bar", {}, {}, 1}},
     {SettingItem::PLAYER_SPONSOR_PRESET, {"player_sponsor_preset", {}, {}, 1}},
+    {SettingItem::PLAYER_SPONSOR_SERVER,
+     {"player_sponsor_server", {"https://bsbsb.top", "http://103.236.70.57:9876"}, {}, 0}},
     {SettingItem::PLAYER_SPONSOR_USER_ID, {"player_sponsor_user_id", {}, {}, 1}},
     {SettingItem::NETWORK_BLOCK_PCDN, {"network_block_pcdn", {}, {}, 1}},
     {SettingItem::NETWORK_CDN_PREFER, {"network_cdn_prefer", {}, {}, 1}},
@@ -645,6 +647,14 @@ void ProgramConfig::load() {
 
     // 空降助手（SponsorBlock）：自动跳过赞助、开场、结尾等片段
     wiliwili::SponsorBlock::ENABLED = getBoolOption(SettingItem::PLAYER_SPONSOR_BLOCK);
+    // 服务端地址：优先用配置里保存的完整 URL，兼容旧版本按索引存储的数字。
+    {
+        const auto serverIndex = getStringOptionIndex(SettingItem::PLAYER_SPONSOR_SERVER);
+        const auto& servers    = wiliwili::SponsorBlock::availableServers();
+        if (serverIndex >= 0 && serverIndex < static_cast<int>(servers.size())) {
+            wiliwili::SponsorBlock::SERVER = servers[serverIndex];
+        }
+    }
     // 是否在播放进度条上绘制分段颜色标记
     wiliwili::SponsorBlock::SHOW_ON_PROGRESS_BAR = getBoolOption(SettingItem::PLAYER_SPONSOR_PROGRESS_BAR);
     {

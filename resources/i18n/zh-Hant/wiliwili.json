@@ -119,7 +119,12 @@
         "cat_default": "預設（贊助 / 開場 / 結尾）",
         "cat_sponsor_only": "僅贊助片段",
         "cat_loose": "寬鬆（含自我推廣 / 高能時刻）",
-        "cat_all": "全部（所有已標註類型）"
+        "cat_all": "全部（所有已標註類型）",
+        "server": "伺服器位址",
+        "speed_test": "測速並查看延遲",
+        "speed_testing": "正在測速，請稍候…",
+        "speed_best": "最快伺服器",
+        "speed_failed": "所有伺服器均不可用"
       }
     },
     "tools": {

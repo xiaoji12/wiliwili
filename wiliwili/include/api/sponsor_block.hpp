@@ -114,8 +114,23 @@ public:
     /// 是否在播放进度条上绘制分段颜色标记
     inline static bool SHOW_ON_PROGRESS_BAR = true;
 
-    /// 服务端地址（BilibiliSponsorBlock 官方后端）
-    inline static std::string SERVER = "https://www.bsbsb.top";
+    /// 可选服务端地址。
+    /// 0: 官方域名（默认）；1: 备用直连 IP。索引与设置页下拉框一一对应。
+    static const std::vector<std::string>& availableServers();
+
+    /// 服务端地址，由配置项 player_sponsor_server 初始化。
+    /// 修改后立即可用于后续的加载 / 提交通道，无需重启。
+    inline static std::string SERVER = "https://bsbsb.top";
+
+    /**
+     * 测量所有候选服务端的响应延迟（异步）。
+     * 每个服务端并行发起一次轻量 GET，用完成耗时作为“测速”结果。
+     *
+     * @param callback 全部测速完成后调用，参数为与 availableServers() 顺序一致的
+     *                 延迟毫秒数，-1 表示请求失败/超时。
+     *                 注意：callback 在 cpr 的后台线程中被调用，UI 侧需自行切回主线程。
+     */
+    static void measureLatency(std::function<void(const std::vector<int64_t>&)> callback);
 
     /// 参与自动跳过的分类。
     /// 默认只开启语义明确、误跳风险低的三类（与上游 BilibiliSponsorBlock 的

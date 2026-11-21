@@ -58,6 +58,8 @@ private:
     BRLS_BIND(brls::BooleanCell, cellSponsorBlock, "setting/sponsor/block");
     BRLS_BIND(BiliSelectorCell, selectorSponsorCategories, "setting/sponsor/categories");
     BRLS_BIND(brls::BooleanCell, cellSponsorProgressBar, "setting/sponsor/progress_bar");
+    BRLS_BIND(BiliSelectorCell, selectorSponsorServer, "setting/sponsor/server");
+    BRLS_BIND(brls::RadioCell, btnSponsorServerSpeed, "setting/sponsor/server_speed");
     // B 站播放地址优化
     BRLS_BIND(brls::BooleanCell, cellBlockPcdn, "setting/network/pcdn");
     BRLS_BIND(BiliSelectorCell, selectorCdnPrefer, "setting/network/cdn");

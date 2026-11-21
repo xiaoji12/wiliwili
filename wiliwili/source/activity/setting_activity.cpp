@@ -6,6 +6,7 @@
 #include <borealis/core/i18n.hpp>
 #include <borealis/core/application.hpp>
 #include <borealis/core/cache_helper.hpp>
+#include <borealis/core/thread.hpp>
 #include <borealis/views/applet_frame.hpp>
 #include <borealis/views/dialog.hpp>
 #include <borealis/views/cells/cell_bool.hpp>
@@ -606,6 +607,57 @@ void SettingActivity::onContentAvailable() {
             }
             return true;
         });
+
+    /// 空降助手：服务端选择（两个候选地址，切换后立即生效）
+    {
+        const auto& servers = wiliwili::SponsorBlock::availableServers();
+        selectorSponsorServer->init(
+            "wiliwili/setting/app/sponsor/server"_i18n, servers,
+            conf.getStringOptionIndex(SettingItem::PLAYER_SPONSOR_SERVER), [servers](int data) {
+                if (data < 0 || data >= static_cast<int>(servers.size())) return false;
+                ProgramConfig::instance().setSettingItem(SettingItem::PLAYER_SPONSOR_SERVER, servers[data]);
+                wiliwili::SponsorBlock::SERVER = servers[data];
+                return true;
+            });
+    }
+
+    /// 空降助手：服务端测速（并行请求各服务端并回显延迟）
+    btnSponsorServerSpeed->registerClickAction([](...) -> bool {
+        brls::Application::notify("wiliwili/setting/app/sponsor/speed_testing"_i18n);
+        wiliwili::SponsorBlock::measureLatency([](const std::vector<int64_t>& latencies) {
+            const auto& servers = wiliwili::SponsorBlock::availableServers();
+
+            // 找出延迟最低的可用服务端
+            int64_t bestMs  = -1;
+            int bestIndex   = -1;
+            for (size_t i = 0; i < latencies.size(); ++i) {
+                if (latencies[i] < 0) continue;
+                if (bestMs < 0 || latencies[i] < bestMs) {
+                    bestMs    = latencies[i];
+                    bestIndex = static_cast<int>(i);
+                }
+            }
+
+            // cpr 回调在后台线程，UI 操作必须切回主线程
+            brls::Threading::sync([latencies, servers, bestMs, bestIndex]() {
+                std::string message;
+                for (size_t i = 0; i < servers.size() && i < latencies.size(); ++i) {
+                    std::string latency = latencies[i] < 0
+                                              ? "timeout"
+                                              : std::to_string(latencies[i]) + "ms";
+                    message += servers[i] + ": " + latency;
+                    if (i + 1 < servers.size()) message += "\n";
+                }
+                if (bestIndex >= 0) {
+                    message += "\n" + "wiliwili/setting/app/sponsor/speed_best"_i18n + ": " + servers[bestIndex];
+                } else {
+                    message += "\n" + "wiliwili/setting/app/sponsor/speed_failed"_i18n;
+                }
+                brls::Application::notify(message);
+            });
+        });
+        return true;
+    });
 
     /// B 站播放地址优化：屏蔽 PCDN 节点 / CDN 优选
     cellBlockPcdn->init("wiliwili/setting/app/network/block_pcdn"_i18n,

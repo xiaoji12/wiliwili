@@ -115,7 +115,14 @@
                             <brls:BooleanCell
                                     id="setting/sponsor/progress_bar"/>
 
-                        </brls:Box>
+                             <SelectorCell
+                                     id="setting/sponsor/server"/>
+
+                             <brls:RadioCell
+                                     id="setting/sponsor/server_speed"
+                                     title="@i18n/wiliwili/setting/app/sponsor/speed_test"/>
+
+                         </brls:Box>
                     </brls:Box>
                 </brls:ScrollingFrame>
             </Tab>

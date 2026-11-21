@@ -119,7 +119,12 @@
         "cat_default": "默认（赞助 / 开场 / 结尾）",
         "cat_sponsor_only": "仅赞助片段",
         "cat_loose": "宽松（含自我推广 / 高能时刻）",
-        "cat_all": "全部（所有已标注类型）"
+        "cat_all": "全部（所有已标注类型）",
+        "server": "服务端地址",
+        "speed_test": "测速并查看延迟",
+        "speed_testing": "正在测速，请稍候…",
+        "speed_best": "最快服务端",
+        "speed_failed": "所有服务端均不可用"
       }
     },
     "tools": {

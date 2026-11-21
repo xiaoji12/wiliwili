@@ -119,7 +119,12 @@
         "cat_default": "Default (sponsor / intro / outro)",
         "cat_sponsor_only": "Sponsor only",
         "cat_loose": "Relaxed (+ self-promo / highlight)",
-        "cat_all": "All (every labeled type)"
+        "cat_all": "All (every labeled type)",
+        "server": "Server address",
+        "speed_test": "Test speed / latency",
+        "speed_testing": "Testing speed, please wait…",
+        "speed_best": "Fastest server",
+        "speed_failed": "No server is reachable"
       }
     },
     "tools": {

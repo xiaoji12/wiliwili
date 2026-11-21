@@ -5,8 +5,11 @@
 #include "api/sponsor_block.hpp"
 
 #include <algorithm>
+#include <atomic>
+#include <chrono>
 #include <cmath>
 #include <memory>
+#include <mutex>
 #include <random>
 
 #include <borealis.hpp>
@@ -35,6 +38,52 @@ static constexpr double END_MARGIN = 0.5;
 SponsorBlock& SponsorBlock::instance() {
     static SponsorBlock inst;
     return inst;
+}
+
+const std::vector<std::string>& SponsorBlock::availableServers() {
+    // 顺序必须与设置页下拉框、配置索引一致
+    static const std::vector<std::string> servers = {
+        "https://bsbsb.top",           // 官方域名（BilibiliSponsorBlock 中文后端）
+        "http://103.236.70.57:9876",   // 备用直连 IP
+    };
+    return servers;
+}
+
+void SponsorBlock::measureLatency(std::function<void(const std::vector<int64_t>&)> callback) {
+    const auto& servers = availableServers();
+
+    // 结果、计数器、互斥量由所有并发请求共享；最后一个完成的线程负责回调。
+    auto results = std::make_shared<std::vector<int64_t>>(servers.size(), -1);
+    auto pending = std::make_shared<std::atomic<int>>(static_cast<int>(servers.size()));
+    auto callbackMtx = std::make_shared<std::mutex>();
+
+    for (size_t i = 0; i < servers.size(); ++i) {
+        auto session = std::make_shared<cpr::Session>();
+        session->SetUrl(cpr::Url{servers[i] + "/api/skipSegments/0000"});
+        session->SetHeader(cpr::Header{{"User-Agent", "wiliwili"}});
+        session->SetTimeout(cpr::Timeout{SPONSOR_TIMEOUT_MS});
+        session->SetConnectTimeout(cpr::ConnectTimeout{SPONSOR_TIMEOUT_MS});
+        session->SetProxies(bilibili::HTTP::PROXIES);
+        session->SetVerifySsl(bilibili::HTTP::VERIFY);
+
+        // 用 begin 记录发起时刻，回调里计算耗时；cpr 内部持有 session，回调期间不会析构。
+        const auto begin = std::chrono::steady_clock::now();
+        session->GetCallback([results, pending, callbackMtx, callback, begin, i](const cpr::Response& r) {
+            int64_t latency = -1;
+            if (!r.error) {
+                latency = std::chrono::duration_cast<std::chrono::milliseconds>(
+                              std::chrono::steady_clock::now() - begin)
+                              .count();
+                // 4xx/5xx 也算一次“连通”的测速结果，只有网络错误才记为失败。
+            }
+            (*results)[i] = latency;
+
+            if (pending->fetch_sub(1) == 1) {
+                std::lock_guard<std::mutex> lock(*callbackMtx);
+                if (callback) callback(*results);
+            }
+        });
+    }
 }
 
 void SponsorBlock::reset() {
